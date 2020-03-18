@@ -3,9 +3,11 @@ description: 'Set up a specific version of GHC and Cabal and add the command-lin
 author: 'GitHub'
 inputs:
   ghc-version:
+    required: false
     description: 'Exact version of ghc to use.'
-    default: '8.6.5'
+    default: '8.8.3'
   cabal-version:
+    required: false
     description: 'Exact version of cabal to use.'
     default: '3.0'
 runs:
