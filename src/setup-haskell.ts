@@ -7,7 +7,7 @@ const baseInstallDir = '/opt';
 const defaultGHCVersion = '8.6.5';
 const defaultCabalVersion = '3.0';
 
-async function run() {
+async function run(): Promise<void> {
   try {
     let ghcVersion = core.getInput('ghc-version');
     if (!ghcVersion) {
