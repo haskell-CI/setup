@@ -2,25 +2,17 @@ name: Main workflow
 on: [push]
 jobs:
   run:
-    name: Run
+    name: Test ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
-
-    - name: Set Node.js 10.x
-      uses: actions/setup-node@master
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
       with:
-        node-version: 10.x
+        node-version: 12.x
 
-    - name: npm install
-      run: npm install
-
-    - name: Lint
-      run: npm run format-check
-
-    - name: npm test
-      run: npm test
+    - run: npm install
+    - run: npm run lint
+    - run: npm test
