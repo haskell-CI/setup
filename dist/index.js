@@ -34,7 +34,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(918);
+/******/ 		return __webpack_require__(429);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -50,8 +50,173 @@ module.exports = require("os");
 
 /***/ }),
 
+/***/ 429:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports =
+/******/ (function(modules, runtime) { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	__webpack_require__.ab = __dirname + "/";
+/******/
+/******/ 	// the startup function
+/******/ 	function startup() {
+/******/ 		// Load entry module and return exports
+/******/ 		return __webpack_require__(429);
+/******/ 	};
+/******/
+/******/ 	// run startup
+/******/ 	return startup();
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ 87:
+/***/ (function(module) {
+
+module.exports = __webpack_require__(87);
+
+/***/ }),
+
+/***/ 429:
+/***/ (function(module, __unusedexports, __nested_webpack_require_1499__) {
+
+module.exports =
+/******/ (function(modules, runtime) { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	__webpack_require__.ab = __dirname + "/";
+/******/
+/******/ 	// the startup function
+/******/ 	function startup() {
+/******/ 		// Load entry module and return exports
+/******/ 		return __webpack_require__(429);
+/******/ 	};
+/******/
+/******/ 	// run startup
+/******/ 	return startup();
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ 87:
+/***/ (function(module) {
+
+module.exports = __nested_webpack_require_1499__(87);
+
+/***/ }),
+
+/***/ 429:
+/***/ (function(module, __unusedexports, __nested_webpack_require_1499__) {
+
+module.exports =
+/******/ (function(modules, runtime) { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	__webpack_require__.ab = __dirname + "/";
+/******/
+/******/ 	// the startup function
+/******/ 	function startup() {
+/******/ 		// Load entry module and return exports
+/******/ 		return __webpack_require__(918);
+/******/ 	};
+/******/
+/******/ 	// run startup
+/******/ 	return startup();
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ 87:
+/***/ (function(module) {
+
+module.exports = __nested_webpack_require_1499__(87);
+
+/***/ }),
+
 /***/ 431:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __nested_webpack_require_1499__) {
 
 "use strict";
 
@@ -63,7 +228,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const os = __importStar(__webpack_require__(87));
+const os = __importStar(__nested_webpack_require_1499__(87));
 /**
  * Commands
  *
@@ -136,7 +301,7 @@ function escapeProperty(s) {
 /***/ }),
 
 /***/ 470:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __nested_webpack_require_3946__) {
 
 "use strict";
 
@@ -157,9 +322,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const command_1 = __webpack_require__(431);
-const os = __importStar(__webpack_require__(87));
-const path = __importStar(__webpack_require__(622));
+const command_1 = __nested_webpack_require_3946__(431);
+const os = __importStar(__nested_webpack_require_3946__(87));
+const path = __importStar(__nested_webpack_require_3946__(622));
 /**
  * The code to exit an action
  */
@@ -354,19 +519,19 @@ exports.getState = getState;
 /***/ 622:
 /***/ (function(module) {
 
-module.exports = require("path");
+module.exports = __nested_webpack_require_1499__(622);
 
 /***/ }),
 
 /***/ 747:
 /***/ (function(module) {
 
-module.exports = require("fs");
+module.exports = __nested_webpack_require_1499__(747);
 
 /***/ }),
 
 /***/ 749:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __nested_webpack_require_10578__) {
 
 "use strict";
 
@@ -378,9 +543,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core = __importStar(__webpack_require__(470));
-const fs = __importStar(__webpack_require__(747));
-const path = __importStar(__webpack_require__(622));
+const core = __importStar(__nested_webpack_require_10578__(470));
+const fs = __importStar(__nested_webpack_require_10578__(747));
+const path = __importStar(__nested_webpack_require_10578__(622));
 function findHaskellGHCVersion(baseInstallDir, version) {
     return _findHaskellToolVersion(baseInstallDir, 'ghc', version);
 }
@@ -414,7 +579,7 @@ exports._findHaskellToolVersion = _findHaskellToolVersion;
 /***/ }),
 
 /***/ 918:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __nested_webpack_require_12243__) {
 
 "use strict";
 
@@ -435,8 +600,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core = __importStar(__webpack_require__(470));
-const installer_1 = __webpack_require__(749);
+const core = __importStar(__nested_webpack_require_12243__(470));
+const installer_1 = __nested_webpack_require_12243__(749);
 // ghc and cabal are installed directly to /opt so use that directlly instead of
 // copying over to the toolcache dir.
 const baseInstallDir = '/opt';
@@ -463,6 +628,60 @@ function run() {
 }
 run();
 
+
+/***/ })
+
+/******/ });
+
+/***/ }),
+
+/***/ 622:
+/***/ (function(module) {
+
+module.exports = __nested_webpack_require_1499__(622);
+
+/***/ }),
+
+/***/ 747:
+/***/ (function(module) {
+
+module.exports = __nested_webpack_require_1499__(747);
+
+/***/ })
+
+/******/ });
+
+/***/ }),
+
+/***/ 622:
+/***/ (function(module) {
+
+module.exports = __webpack_require__(622);
+
+/***/ }),
+
+/***/ 747:
+/***/ (function(module) {
+
+module.exports = __webpack_require__(747);
+
+/***/ })
+
+/******/ });
+
+/***/ }),
+
+/***/ 622:
+/***/ (function(module) {
+
+module.exports = require("path");
+
+/***/ }),
+
+/***/ 747:
+/***/ (function(module) {
+
+module.exports = require("fs");
 
 /***/ })
 
