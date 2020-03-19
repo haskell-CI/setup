@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "setup haskell action",
-  "main": "dist/index.js",
+  "main": "src/setup-haskell.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
     "format": "prettier --write **/*.{ts,json}",
