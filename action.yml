@@ -9,7 +9,7 @@ inputs:
   cabal-version:
     required: false
     description: 'Exact version of cabal to use.'
-    default: '3.0'
+    default: '3.0.0.0'
 runs:
   using: 'node12'
   main: 'dist/index.js'
