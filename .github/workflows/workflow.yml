@@ -1,18 +1,35 @@
 name: Main workflow
 on: [push]
 jobs:
-  run:
+  test:
     name: Test ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
 
-    - run: npm install
-    - run: npm run lint
-    - run: npm test
+      - run: npm install
+      - run: npm run lint
+      - run: npm test
+
+  install-haskell:
+    name: Test GHC Install ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          ghc-version: '8.8.3'
+          cabal-version: '3.0.0.0'
+      - shell: bash
+        run: |
+          [[ "$(ghc --version)" =~ "8.8.3" ]]
+          which cabal
