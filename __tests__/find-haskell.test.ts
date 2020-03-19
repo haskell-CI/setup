@@ -1,6 +1,5 @@
 import * as io from '@actions/io';
 import fs = require('fs');
-import os = require('os');
 import path = require('path');
 
 const toolDir = path.join(__dirname, 'runner', 'tools');
@@ -8,7 +7,7 @@ const toolDir = path.join(__dirname, 'runner', 'tools');
 process.env['AGENT_TOOLSDIRECTORY'] = toolDir;
 process.env['RUNNER_TOOL_CACHE'] = toolDir;
 
-import {findHaskellGHCVersion, findHaskellCabalVersion} from '../src/installer';
+import {installGHC, installCabal} from '../src/installer';
 
 describe('find-haskell', () => {
   beforeAll(async () => {
@@ -33,18 +32,18 @@ describe('find-haskell', () => {
 
   it('Uses version of ghc installed in cache', async () => {
     // This will throw if it doesn't find it in the cache (because no such version exists)
-    await findHaskellGHCVersion(toolDir, '8.6.5');
+    await installGHC('8.6.5');
   });
 
   it('Uses version of cabal installed in cache', async () => {
     // This will throw if it doesn't find it in the cache (because no such version exists)
-    await findHaskellCabalVersion(toolDir, '2.0');
+    await installCabal('2.0');
   });
 
   it('findHaskellGHCVersion throws if cannot find any version of ghc', async () => {
     let thrown = false;
     try {
-      await findHaskellGHCVersion(toolDir, '9.9.9');
+      await installGHC('0.0.0');
     } catch {
       thrown = true;
     }
@@ -54,17 +53,7 @@ describe('find-haskell', () => {
   it('findHaskellCabalVersion throws if cannot find any version of ghc', async () => {
     let thrown = false;
     try {
-      await findHaskellCabalVersion(toolDir, '9.9.9');
-    } catch {
-      thrown = true;
-    }
-    expect(thrown).toBe(true);
-  });
-
-  it('findHaskellGHCVersion throws without baseInstallDir', async () => {
-    let thrown = false;
-    try {
-      await findHaskellGHCVersion('', '8.6.5');
+      await installCabal('0.0.0');
     } catch {
       thrown = true;
     }

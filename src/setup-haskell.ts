@@ -1,25 +1,20 @@
 import * as core from '@actions/core';
-import {findHaskellGHCVersion, findHaskellCabalVersion} from './installer';
+import {installGHC, installCabal} from './installer';
+import {safeLoad} from 'js-yaml';
+import {readFileSync} from 'fs';
+import {join} from 'path';
 
-// ghc and cabal are installed directly to /opt so use that directlly instead of
-// copying over to the toolcache dir.
-const baseInstallDir = '/opt';
-const defaultGHCVersion = '8.6.5';
-const defaultCabalVersion = '3.0';
+const actionYml = safeLoad(readFileSync(join('..', 'action.yml'), 'utf8'));
+const defaultGHCVersion = actionYml.inputs['ghc-version'].default;
+const defaultCabalVersion = actionYml.inputs['cabal-version'].default;
 
 async function run(): Promise<void> {
   try {
-    let ghcVersion = core.getInput('ghc-version');
-    if (!ghcVersion) {
-      ghcVersion = defaultGHCVersion;
-    }
-    findHaskellGHCVersion(baseInstallDir, ghcVersion);
+    const ghcVersion = core.getInput('ghc-version') || defaultGHCVersion;
+    await installGHC(ghcVersion);
 
-    let cabalVersion = core.getInput('cabal-version');
-    if (!cabalVersion) {
-      cabalVersion = defaultCabalVersion;
-    }
-    findHaskellCabalVersion(baseInstallDir, cabalVersion);
+    const cabalVersion = core.getInput('cabal-version') || defaultCabalVersion;
+    await installCabal(cabalVersion);
   } catch (error) {
     core.setFailed(error.message);
   }
