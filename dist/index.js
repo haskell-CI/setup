@@ -8574,37 +8574,45 @@ const exec_1 = __webpack_require__(986);
 const tc = __importStar(__webpack_require__(533));
 const fs_1 = __webpack_require__(747);
 const path = __importStar(__webpack_require__(622));
-exports.installCabal = (version) => __awaiter(void 0, void 0, void 0, function* () { return installTool('Cabal', version); });
-exports.installGHC = (version) => __awaiter(void 0, void 0, void 0, function* () { return installTool('Ghc', version); });
+exports.installCabal = (version) => __awaiter(void 0, void 0, void 0, function* () { return installTool('cabal', version); });
+exports.installGHC = (version) => __awaiter(void 0, void 0, void 0, function* () { return installTool('ghc', version); });
 function installTool(tool, version) {
     return __awaiter(this, void 0, void 0, function* () {
-        const alreadyCached = tc.find(tool.toLowerCase(), version);
-        if (alreadyCached) {
+        const alreadyCached = tc.find(tool, version);
+        if (alreadyCached !== '') {
             core.addPath(alreadyCached);
             return;
         }
         let toolPath = '';
         if (process.platform === 'win32') {
-            for (const step of ['Install', 'Import']) {
-                yield exec_1.exec('powershell', [`${step}-Module`, 'ghcups']);
-            }
-            for (const step of ['Install', 'Set']) {
-                yield exec_1.exec('powershell', [`${step}-${tool}`, version]);
-            }
-            const t = `${tool.toLowerCase()}.${version}`;
-            const p = ['lib', t, 'tools', t, tool === 'Ghc' ? 'bin' : ''];
-            toolPath = path.join(process.env.ChocolateyInstall || '', ...p);
+            yield exec_1.exec('powershell', [
+                'install',
+                tool,
+                '--version',
+                version,
+                '--side-by-side'
+            ]);
+            toolPath = path.join(process.env.ChocolateyInstall || '', 'lib', `${tool}.${version}`, 'tools', `${tool}-${version}`, tool === 'ghc' ? 'bin' : '');
         }
         else {
             const ghcup = yield tc.downloadTool('https://gitlab.haskell.org/haskell/ghcup/raw/master/ghcup');
             yield fs_1.promises.chmod(ghcup, 0o755);
             yield io.mkdirP(path.join(process.env.HOME || '', '.ghcup', 'bin'));
-            yield exec_1.exec(ghcup, [tool === 'Ghc' ? 'install' : 'install-cabal', version]);
-            const p = tool === 'Ghc' ? ['ghc', version] : ['bin'];
-            toolPath = path.join(process.env.HOME || '', '.ghcup', ...p);
+            yield exec_1.exec(ghcup, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
+            const p = tool === 'ghc' ? ['ghc', version] : [];
+            toolPath = path.join(process.env.HOME || '', '.ghcup', ...p, 'bin');
         }
-        const cachedTool = yield tc.cacheDir(toolPath, tool.toLowerCase(), version);
-        core.addPath(cachedTool);
+        const cachedTool = yield tc.cacheDir(toolPath, tool, version);
+        const verifyCached = tc.find(tool, version);
+        if (verifyCached === '' || verifyCached !== cachedTool) {
+            core.warning(`Was not able to cache install of ${tool}`);
+            core.warning(`This may cause extraneous re-downloads`);
+        }
+        else {
+            toolPath = verifyCached;
+            core.debug(`installed ${tool} to ${toolPath}`);
+        }
+        core.addPath(toolPath);
     });
 }
 
