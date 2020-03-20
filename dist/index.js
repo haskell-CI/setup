@@ -8585,6 +8585,7 @@ function installTool(tool, version) {
         }
         let toolPath = '';
         if (process.platform === 'win32') {
+            yield exec_1.exec('powershell', ['choco', 'install', 'msys2']);
             yield exec_1.exec('powershell', [
                 'choco',
                 'install',
@@ -8603,15 +8604,16 @@ function installTool(tool, version) {
             const p = tool === 'ghc' ? ['ghc', version] : [];
             toolPath = path.join(process.env.HOME || '', '.ghcup', ...p, 'bin');
         }
-        const cachedTool = yield tc.cacheDir(toolPath, tool, version);
-        const verifyCached = tc.find(tool, version);
-        if (verifyCached === '' || verifyCached !== cachedTool) {
-            core.warning(`Was not able to cache install of ${tool}`);
-            core.warning(`This may cause extraneous re-downloads`);
-        }
-        else {
-            toolPath = verifyCached;
-            core.debug(`installed ${tool} to ${toolPath}`);
+        if (tool === 'ghc') {
+            const cachedTool = yield tc.cacheDir(toolPath, tool, version);
+            const verifyCached = tc.find(tool, version);
+            if (verifyCached === '' || verifyCached !== cachedTool) {
+                core.warning(`Was not able to cache install of ${tool}`);
+                core.warning(`This may cause extraneous re-downloads`);
+            }
+            else {
+                toolPath = verifyCached;
+            }
         }
         core.addPath(toolPath);
     });
