@@ -11,35 +11,15 @@ export const installCabal = async (version: string): Promise<void> =>
 export const installGHC = async (version: string): Promise<void> =>
   installTool('ghc', version);
 
-async function installTool(
-  tool: 'cabal' | 'ghc',
-  version: string
-): Promise<void> {
-  const alreadyCached = tc.find(tool, version);
-  if (alreadyCached !== '') {
-    core.addPath(alreadyCached);
-    return;
-  }
-
-  let toolPath = '';
+type Tool = 'cabal' | 'ghc';
+async function installTool(tool: Tool, version: string): Promise<void> {
   if (process.platform === 'win32') {
-    await exec('powershell', ['choco', 'install', 'msys2']);
-    await exec('powershell', [
-      'choco',
-      'install',
-      tool,
-      '--version',
-      version,
-      '--side-by-side'
-    ]);
-    toolPath = path.join(
-      process.env.ChocolateyInstall || '',
-      'lib',
-      `${tool}.${version}`,
-      'tools',
-      `${tool}-${version}`,
-      tool === 'ghc' ? 'bin' : ''
-    );
+    const cmd = ['choco', 'install', tool, '--version', version, '-m'];
+    await exec('powershell', cmd);
+
+    const t = `${tool}.${version}`;
+    const p = ['lib', t, 'tools', t, tool === 'ghc' ? 'bin' : ''];
+    core.addPath(path.join(process.env.ChocolateyInstall || '', ...p));
   } else {
     const ghcup = await tc.downloadTool(
       'https://gitlab.haskell.org/haskell/ghcup/raw/master/ghcup'
@@ -49,20 +29,6 @@ async function installTool(
     await exec(ghcup, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
 
     const p = tool === 'ghc' ? ['ghc', version] : [];
-    toolPath = path.join(process.env.HOME || '', '.ghcup', ...p, 'bin');
+    core.addPath(path.join(process.env.HOME || '', '.ghcup', ...p, 'bin'));
   }
-
-  if (tool === 'ghc') {
-    const cachedTool = await tc.cacheDir(toolPath, tool, version);
-    const verifyCached = tc.find(tool, version);
-
-    if (verifyCached === '' || verifyCached !== cachedTool) {
-      core.warning(`Was not able to cache install of ${tool}`);
-      core.warning(`This may cause extraneous re-downloads`);
-    } else {
-      toolPath = verifyCached;
-    }
-  }
-
-  core.addPath(toolPath);
 }

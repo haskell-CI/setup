@@ -8578,23 +8578,12 @@ exports.installCabal = (version) => __awaiter(void 0, void 0, void 0, function* 
 exports.installGHC = (version) => __awaiter(void 0, void 0, void 0, function* () { return installTool('ghc', version); });
 function installTool(tool, version) {
     return __awaiter(this, void 0, void 0, function* () {
-        const alreadyCached = tc.find(tool, version);
-        if (alreadyCached !== '') {
-            core.addPath(alreadyCached);
-            return;
-        }
-        let toolPath = '';
         if (process.platform === 'win32') {
-            yield exec_1.exec('powershell', ['choco', 'install', 'msys2']);
-            yield exec_1.exec('powershell', [
-                'choco',
-                'install',
-                tool,
-                '--version',
-                version,
-                '--side-by-side'
-            ]);
-            toolPath = path.join(process.env.ChocolateyInstall || '', 'lib', `${tool}.${version}`, 'tools', `${tool}-${version}`, tool === 'ghc' ? 'bin' : '');
+            const cmd = ['choco', 'install', tool, '--version', version, '-m'];
+            yield exec_1.exec('powershell', cmd);
+            const t = `${tool}.${version}`;
+            const p = ['lib', t, 'tools', t, tool === 'ghc' ? 'bin' : ''];
+            core.addPath(path.join(process.env.ChocolateyInstall || '', ...p));
         }
         else {
             const ghcup = yield tc.downloadTool('https://gitlab.haskell.org/haskell/ghcup/raw/master/ghcup');
@@ -8602,20 +8591,8 @@ function installTool(tool, version) {
             yield io.mkdirP(path.join(process.env.HOME || '', '.ghcup', 'bin'));
             yield exec_1.exec(ghcup, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
             const p = tool === 'ghc' ? ['ghc', version] : [];
-            toolPath = path.join(process.env.HOME || '', '.ghcup', ...p, 'bin');
+            core.addPath(path.join(process.env.HOME || '', '.ghcup', ...p, 'bin'));
         }
-        if (tool === 'ghc') {
-            const cachedTool = yield tc.cacheDir(toolPath, tool, version);
-            const verifyCached = tc.find(tool, version);
-            if (verifyCached === '' || verifyCached !== cachedTool) {
-                core.warning(`Was not able to cache install of ${tool}`);
-                core.warning(`This may cause extraneous re-downloads`);
-            }
-            else {
-                toolPath = verifyCached;
-            }
-        }
-        core.addPath(toolPath);
     });
 }
 
