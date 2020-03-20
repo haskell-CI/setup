@@ -28,4 +28,4 @@ jobs:
         with:
           ghc-version: '8.8.3'
           cabal-version: '3.0.0.0'
-        run: runghc __tests__/hello.hs
+      - run: runghc __tests__/hello.hs
