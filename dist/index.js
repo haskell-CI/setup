@@ -8578,6 +8578,22 @@ exports.installCabal = (version) => __awaiter(void 0, void 0, void 0, function* 
 exports.installGHC = (version) => __awaiter(void 0, void 0, void 0, function* () { return installTool('ghc', version); });
 function installTool(tool, version) {
     return __awaiter(this, void 0, void 0, function* () {
+        // Currently only linux comes pre-installed with some versions of GHC.
+        // They're intalled to /opt. Let's see if we can save ourselves a download
+        if (process.platform === 'linux') {
+            // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
+            const v = tool === 'cabal' ? version.slice(0, 3) : version;
+            try {
+                const p = path.join('/opt', tool, v, 'bin');
+                yield fs_1.promises.access(p);
+                core.debug(`Using pre-installed ${tool} ${version}`);
+                core.addPath(p);
+                return;
+            }
+            catch (_a) {
+                // oh well, we tried
+            }
+        }
         if (process.platform === 'win32') {
             const cmd = ['choco', 'install', tool, '--version', version, '-m'];
             yield exec_1.exec('powershell', cmd);
