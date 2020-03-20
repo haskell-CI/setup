@@ -6,44 +6,59 @@ import {promises as fs} from 'fs';
 import * as path from 'path';
 
 export const installCabal = async (version: string): Promise<void> =>
-  installTool('Cabal', version);
+  installTool('cabal', version);
 
 export const installGHC = async (version: string): Promise<void> =>
-  installTool('Ghc', version);
+  installTool('ghc', version);
 
 async function installTool(
-  tool: 'Cabal' | 'Ghc',
+  tool: 'cabal' | 'ghc',
   version: string
 ): Promise<void> {
-  const alreadyCached = tc.find(tool.toLowerCase(), version);
-  if (alreadyCached) {
+  const alreadyCached = tc.find(tool, version);
+  if (alreadyCached !== '') {
     core.addPath(alreadyCached);
     return;
   }
 
   let toolPath = '';
   if (process.platform === 'win32') {
-    for (const step of ['Install', 'Import']) {
-      await exec('powershell', [`${step}-Module`, 'ghcups']);
-    }
-    for (const step of ['Install', 'Set']) {
-      await exec('powershell', [`${step}-${tool}`, version]);
-    }
-    const t = `${tool.toLowerCase()}.${version}`;
-    const p = ['lib', t, 'tools', t, tool === 'Ghc' ? 'bin' : ''];
-    toolPath = path.join(process.env.ChocolateyInstall || '', ...p);
+    await exec('powershell', [
+      'install',
+      tool,
+      '--version',
+      version,
+      '--side-by-side'
+    ]);
+    toolPath = path.join(
+      process.env.ChocolateyInstall || '',
+      'lib',
+      `${tool}.${version}`,
+      'tools',
+      `${tool}-${version}`,
+      tool === 'ghc' ? 'bin' : ''
+    );
   } else {
     const ghcup = await tc.downloadTool(
       'https://gitlab.haskell.org/haskell/ghcup/raw/master/ghcup'
     );
     await fs.chmod(ghcup, 0o755);
     await io.mkdirP(path.join(process.env.HOME || '', '.ghcup', 'bin'));
-    await exec(ghcup, [tool === 'Ghc' ? 'install' : 'install-cabal', version]);
+    await exec(ghcup, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
 
-    const p = tool === 'Ghc' ? ['ghc', version] : ['bin'];
+    const p = tool === 'ghc' ? ['ghc', version] : ['bin'];
     toolPath = path.join(process.env.HOME || '', '.ghcup', ...p);
   }
 
-  const cachedTool = await tc.cacheDir(toolPath, tool.toLowerCase(), version);
-  core.addPath(cachedTool);
+  const cachedTool = await tc.cacheDir(toolPath, tool, version);
+  const verifyCached = tc.find(tool, version);
+
+  if (verifyCached === '' || verifyCached !== cachedTool) {
+    core.warning(`Was not able to cache install of ${tool}`);
+    core.warning(`This may cause extraneous re-downloads`);
+  } else {
+    toolPath = verifyCached;
+  }
+
+  core.addPath(toolPath);
 }
