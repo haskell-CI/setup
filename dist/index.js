@@ -8586,6 +8586,7 @@ function installTool(tool, version) {
         let toolPath = '';
         if (process.platform === 'win32') {
             yield exec_1.exec('powershell', [
+                'choco',
                 'install',
                 tool,
                 '--version',

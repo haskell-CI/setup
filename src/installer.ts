@@ -24,6 +24,7 @@ async function installTool(
   let toolPath = '';
   if (process.platform === 'win32') {
     await exec('powershell', [
+      'choco',
       'install',
       tool,
       '--version',
