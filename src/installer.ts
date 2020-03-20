@@ -46,8 +46,8 @@ async function installTool(
     await io.mkdirP(path.join(process.env.HOME || '', '.ghcup', 'bin'));
     await exec(ghcup, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
 
-    const p = tool === 'ghc' ? ['ghc', version] : ['bin'];
-    toolPath = path.join(process.env.HOME || '', '.ghcup', ...p);
+    const p = tool === 'ghc' ? ['ghc', version] : [];
+    toolPath = path.join(process.env.HOME || '', '.ghcup', ...p, 'bin');
   }
 
   const cachedTool = await tc.cacheDir(toolPath, tool, version);
@@ -58,6 +58,7 @@ async function installTool(
     core.warning(`This may cause extraneous re-downloads`);
   } else {
     toolPath = verifyCached;
+    core.debug(`installed ${tool} to ${toolPath}`);
   }
 
   core.addPath(toolPath);
