@@ -95,15 +95,23 @@ export async function installStack(version: string): Promise<void> {
       ? `get.haskellstack.org/stable/${platformMap[process.platform]}`
       : `github.com/commercialhaskell/stack/releases/download/v${version}/${name}`;
 
+  core.info(`url: ${url}`);
   const stack = await tc.downloadTool(`https://${url}.tar.gz`);
+  core.info("can't believe I'm printf debugging but whatever...");
+  core.info(`stack is: ${stack}`);
   const p = await tc.extractTar(stack);
+  core.info(`p is: ${p}`);
   // Less hokey pokey than figuring out how to ./p/*/stack
-  const files = await fs.readdir(p);
-  const stackPath = files.find(f =>
-    new RegExp(`${platformMap[process.platform]}$`).test(f)
+  const files = (await fs.readdir(p, {withFileTypes: true})).flatMap(d =>
+    d.isDirectory() ? [d.name] : []
   );
+  core.info(`files are: ${files}`);
+  const stackPath = files.find(f => f.startsWith('stack'));
+  core.info(`stack path is... ${stackPath}`);
   const cachedTool = await tc.cacheDir(stackPath ?? p, 'stack', version);
+  core.info(`tool is ${cachedTool}`);
   core.addPath(cachedTool);
+  core.info(`adding path worked yey`);
 
   core.endGroup();
 }
