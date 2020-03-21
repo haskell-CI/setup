@@ -8617,8 +8617,9 @@ async function installStack(version) {
     const stack = await tc.downloadTool(`https://${url}.tar.gz`);
     const p = await tc.extractTar(stack);
     // Less hokey pokey than figuring out how to ./p/*/stack
-    const stackPath = (await fs_1.promises.readdir(p)).find(f => new RegExp(`${platformMap[process.platform]}$`).test(f)) || p;
-    const cachedTool = await tc.cacheDir(stackPath, 'stack', version);
+    const files = await fs_1.promises.readdir(p);
+    const stackPath = files.find(f => new RegExp(`${platformMap[process.platform]}$`).test(f));
+    const cachedTool = await tc.cacheDir(stackPath !== null && stackPath !== void 0 ? stackPath : p, 'stack', version);
     core.addPath(cachedTool);
     core.endGroup();
 }
