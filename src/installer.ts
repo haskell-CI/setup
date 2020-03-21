@@ -1,5 +1,4 @@
 import * as core from '@actions/core';
-import * as os from 'os';
 import * as io from '@actions/io';
 import {exec} from '@actions/exec';
 import * as tc from '@actions/tool-cache';
@@ -33,10 +32,8 @@ async function installTool(tool: Tool, version: string): Promise<void> {
   }
 
   if (process.platform === 'win32') {
-    const tmp = path.join(process.env['RUNNER_TEMP'] || os.tmpdir(), 'haskell');
-    await io.mkdirP(tmp);
     const cmd = ['choco', 'install', tool, '--version', version];
-    const flags = ['-m', '--no-progress', '-r', '-c', tmp];
+    const flags = ['-m', '--no-progress', '-r'];
     await exec('powershell', cmd.concat(flags));
 
     const t = `${tool}.${version}`;

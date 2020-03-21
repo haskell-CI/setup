@@ -8569,7 +8569,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
-const os = __importStar(__webpack_require__(87));
 const io = __importStar(__webpack_require__(1));
 const exec_1 = __webpack_require__(986);
 const tc = __importStar(__webpack_require__(533));
@@ -8598,10 +8597,8 @@ function installTool(tool, version) {
             }
         }
         if (process.platform === 'win32') {
-            const tmp = path.join(process.env['RUNNER_TEMP'] || os.tmpdir(), 'haskell');
-            yield io.mkdirP(tmp);
             const cmd = ['choco', 'install', tool, '--version', version];
-            const flags = ['-m', '--no-progress', '-r', '-c', tmp];
+            const flags = ['-m', '--no-progress', '-r'];
             yield exec_1.exec('powershell', cmd.concat(flags));
             const t = `${tool}.${version}`;
             const p = ['lib', t, 'tools', t, tool === 'ghc' ? 'bin' : ''];
