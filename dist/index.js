@@ -8569,6 +8569,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
+const os = __importStar(__webpack_require__(87));
 const io = __importStar(__webpack_require__(1));
 const exec_1 = __webpack_require__(986);
 const tc = __importStar(__webpack_require__(533));
@@ -8578,6 +8579,7 @@ exports.installCabal = (version) => __awaiter(void 0, void 0, void 0, function* 
 exports.installGHC = (version) => __awaiter(void 0, void 0, void 0, function* () { return installTool('ghc', version); });
 function installTool(tool, version) {
     return __awaiter(this, void 0, void 0, function* () {
+        core.startGroup(`Installing ${tool}`);
         // Currently only linux comes pre-installed with some versions of GHC.
         // They're intalled to /opt. Let's see if we can save ourselves a download
         if (process.platform === 'linux') {
@@ -8588,6 +8590,7 @@ function installTool(tool, version) {
                 yield fs_1.promises.access(p);
                 core.debug(`Using pre-installed ${tool} ${version}`);
                 core.addPath(p);
+                core.endGroup();
                 return;
             }
             catch (_a) {
@@ -8595,8 +8598,11 @@ function installTool(tool, version) {
             }
         }
         if (process.platform === 'win32') {
-            const cmd = ['choco', 'install', tool, '--version', version, '-m'];
-            yield exec_1.exec('powershell', cmd);
+            const tmp = path.join(process.env['RUNNER_TEMP'] || os.tmpdir(), 'haskell');
+            yield io.mkdirP(tmp);
+            const cmd = ['choco', 'install', tool, '--version', version];
+            const flags = ['-m', '-r', '-c', tmp];
+            yield exec_1.exec('powershell', cmd.concat(flags));
             const t = `${tool}.${version}`;
             const p = ['lib', t, 'tools', t, tool === 'ghc' ? 'bin' : ''];
             core.addPath(path.join(process.env.ChocolateyInstall || '', ...p));
@@ -8609,6 +8615,7 @@ function installTool(tool, version) {
             const p = tool === 'ghc' ? ['ghc', version] : [];
             core.addPath(path.join(process.env.HOME || '', '.ghcup', ...p, 'bin'));
         }
+        core.endGroup();
     });
 }
 

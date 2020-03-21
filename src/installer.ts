@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import * as os from 'os';
 import * as io from '@actions/io';
 import {exec} from '@actions/exec';
 import * as tc from '@actions/tool-cache';
@@ -13,6 +14,7 @@ export const installGHC = async (version: string): Promise<void> =>
 
 type Tool = 'cabal' | 'ghc';
 async function installTool(tool: Tool, version: string): Promise<void> {
+  core.startGroup(`Installing ${tool}`);
   // Currently only linux comes pre-installed with some versions of GHC.
   // They're intalled to /opt. Let's see if we can save ourselves a download
   if (process.platform === 'linux') {
@@ -23,6 +25,7 @@ async function installTool(tool: Tool, version: string): Promise<void> {
       await fs.access(p);
       core.debug(`Using pre-installed ${tool} ${version}`);
       core.addPath(p);
+      core.endGroup();
       return;
     } catch {
       // oh well, we tried
@@ -30,8 +33,11 @@ async function installTool(tool: Tool, version: string): Promise<void> {
   }
 
   if (process.platform === 'win32') {
-    const cmd = ['choco', 'install', tool, '--version', version, '-m'];
-    await exec('powershell', cmd);
+    const tmp = path.join(process.env['RUNNER_TEMP'] || os.tmpdir(), 'haskell');
+    await io.mkdirP(tmp);
+    const cmd = ['choco', 'install', tool, '--version', version];
+    const flags = ['-m', '-r', '-c', tmp];
+    await exec('powershell', cmd.concat(flags));
 
     const t = `${tool}.${version}`;
     const p = ['lib', t, 'tools', t, tool === 'ghc' ? 'bin' : ''];
@@ -47,4 +53,5 @@ async function installTool(tool: Tool, version: string): Promise<void> {
     const p = tool === 'ghc' ? ['ghc', version] : [];
     core.addPath(path.join(process.env.HOME || '', '.ghcup', ...p, 'bin'));
   }
+  core.endGroup();
 }
