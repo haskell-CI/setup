@@ -8611,7 +8611,7 @@ async function installStack(version) {
         win32: 'windows-x86_64'
     };
     const name = `stack-${version}-${platformMap[process.platform]}`;
-    const url = version === 'stable'
+    const url = version === 'latest'
         ? `get.haskellstack.org/stable/${platformMap[process.platform]}`
         : `github.com/commercialhaskell/stack/releases/download/v${version}/${name}`;
     const stack = await tc.downloadTool(`https://${url}.tar.gz`);

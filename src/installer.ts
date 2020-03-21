@@ -91,7 +91,7 @@ export async function installStack(version: string): Promise<void> {
 
   const name = `stack-${version}-${platformMap[process.platform]}`;
   const url =
-    version === 'stable'
+    version === 'latest'
       ? `get.haskellstack.org/stable/${platformMap[process.platform]}`
       : `github.com/commercialhaskell/stack/releases/download/v${version}/${name}`;
 
