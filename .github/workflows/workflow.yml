@@ -12,7 +12,8 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: npm ci
+      # http://www.tiernok.com/posts/2019/faster-npm-installs-during-ci/
+      - run: npm ci --prefer-offline --no-audit --progress=false
       - run: npm run pre-push
 
   install-haskell:
@@ -35,7 +36,7 @@ jobs:
         if: matrix.os  == 'windows-latest'
         with:
           path: ${{ runner.temp }}/haskell
-          key: ${{ runner.os }}-${{ matrix.ghc }}-choco-haskell
+          key: ${{ runner.os }}-${{ matrix.ghc }}-haskell
 
       - uses: ./
         with:
