@@ -46,13 +46,6 @@ jobs:
           # GHC 8.8+ only works with cabal v3+
           - ghc: 8.8.3
             cabal: 2.4.1.0
-            os: ubuntu-latest
-          - ghc: 8.8.3
-            cabal: 2.4.1.0
-            os: macOS-latest
-          - ghc: 8.8.3
-            cabal: 2.4.1.0
-            os: windows-latest
     name: Haskell GHC ${{ matrix.ghc }} sample
     steps:
       - uses: actions/checkout@v2
