@@ -101,10 +101,10 @@ export async function installStack(version: string): Promise<void> {
   // Less janky than figuring out how to ./p/*/stack. (Not by much)
   const stackPath =
     (await fs.readdir(p, {withFileTypes: true}))
-      .flatMap(d => (d.isDirectory() ? [join(p, d.name)] : []))
+      .flatMap(d => (d.isDirectory() ? [d.name] : []))
       .find(f => f.startsWith('stack')) ?? '';
 
-  const cachedTool = await tc.cacheDir(stackPath, 'stack', version);
+  const cachedTool = await tc.cacheDir(join(p, stackPath), 'stack', version);
   core.addPath(cachedTool);
 
   core.endGroup();

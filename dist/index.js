@@ -8619,9 +8619,9 @@ async function installStack(version) {
     const p = await tc.extractTar(stack);
     // Less janky than figuring out how to ./p/*/stack. (Not by much)
     const stackPath = (_a = (await fs_1.promises.readdir(p, { withFileTypes: true }))
-        .flatMap(d => (d.isDirectory() ? [path_1.join(p, d.name)] : []))
+        .flatMap(d => (d.isDirectory() ? [d.name] : []))
         .find(f => f.startsWith('stack'))) !== null && _a !== void 0 ? _a : '';
-    const cachedTool = await tc.cacheDir(stackPath, 'stack', version);
+    const cachedTool = await tc.cacheDir(path_1.join(p, stackPath), 'stack', version);
     core.addPath(cachedTool);
     core.endGroup();
 }
