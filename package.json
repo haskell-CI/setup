@@ -12,7 +12,7 @@
     "format": "prettier --write **/*.{ts,json}",
     "pack": "ncc build",
     "_git-add": "git add dist",
-    "pre-push": "npm-run-all check:* test",
+    "pre-push": "run-p check:* test",
     "pre-commit": "npm-run-all format pack _git-add"
   },
   "repository": {
