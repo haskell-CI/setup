@@ -1,8 +1,6 @@
 # setup-haskell
 
-<p align="left">
-  <a href="https://github.com/actions/setup-haskell"><img alt="GitHub Actions status" src="https://github.com/actions/setup-haskell/workflows/Main%20workflow/badge.svg"></a>
-</p>
+[![GitHub Actions status](https://github.com/actions/setup-haskell/workflows/Main%20workflow/badge.svg)](https://github.com/actions/setup-haskell)
 
 This action installs a specified version of GHC and Cabal.
 
