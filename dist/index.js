@@ -8601,6 +8601,7 @@ exports.getOpts = getOpts;
 exports.installCabal = async (version) => installTool('cabal', version);
 exports.installGHC = async (version) => installTool('ghc', version);
 async function installStack(version) {
+    var _a;
     const info = version === 'latest'
         ? 'Installing the latest version'
         : `Installing version ${version}`;
@@ -8614,21 +8615,14 @@ async function installStack(version) {
     const url = version === 'latest'
         ? `get.haskellstack.org/stable/${platformMap[process.platform]}`
         : `github.com/commercialhaskell/stack/releases/download/v${version}/${name}`;
-    core.info(`url: ${url}`);
     const stack = await tc.downloadTool(`https://${url}.tar.gz`);
-    core.info("can't believe I'm printf debugging but whatever...");
-    core.info(`stack is: ${stack}`);
     const p = await tc.extractTar(stack);
-    core.info(`p is: ${p}`);
-    // Less hokey pokey than figuring out how to ./p/*/stack
-    const files = (await fs_1.promises.readdir(p, { withFileTypes: true })).flatMap(d => d.isDirectory() ? [d.name] : []);
-    core.info(`files are: ${files}`);
-    const stackPath = files.find(f => f.startsWith('stack'));
-    core.info(`stack path is... ${stackPath}`);
-    const cachedTool = await tc.cacheDir(stackPath !== null && stackPath !== void 0 ? stackPath : p, 'stack', version);
-    core.info(`tool is ${cachedTool}`);
+    // Less janky than figuring out how to ./p/*/stack. (Not by much)
+    const stackPath = (_a = (await fs_1.promises.readdir(p, { withFileTypes: true }))
+        .flatMap(d => (d.isDirectory() ? [path_1.join(p, d.name)] : []))
+        .find(f => f.startsWith('stack'))) !== null && _a !== void 0 ? _a : '';
+    const cachedTool = await tc.cacheDir(stackPath, 'stack', version);
     core.addPath(cachedTool);
-    core.info(`adding path worked yey`);
     core.endGroup();
 }
 exports.installStack = installStack;
