@@ -16,29 +16,45 @@ See [action.yml](action.yml)
 Basic:
 
 ```yaml
-steps:
-  - uses: actions/checkout@v2
-  - uses: actions/setup-haskell@v1
-    with:
-      ghc-version: '8.8.3' # Exact version of ghc to use
-      cabal-version: '3.0.0.0'
-  - run: runhaskell Hello.hs
+on: [push]
+name: build
+jobs:
+  runhaskell:
+    name: Hello World
+    runs-on: ubuntu-latest # or macOS-latest, or windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-haskell@v1
+        with:
+          ghc-version: '8.8.3' # Exact version of ghc to use
+          cabal-version: '3.0.0.0'
+      - run: runhaskell Hello.hs
 ```
 
 Matrix Testing:
 
 ```yaml
+on: [push]
+name: build
 jobs:
   build:
-    runs-on: ubuntu-16.04
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         ghc: ['8.6.5', '8.8.3']
         cabal: ['2.4.1.0', '3.0.0.0']
+        os: [ubuntu-latest, macOS-latest, windows-latest]
         exclude:
           # GHC 8.8+ only works with cabal v3+
           - ghc: 8.8.3
             cabal: 2.4.1.0
+            os: ubuntu-latest
+          - ghc: 8.8.3
+            cabal: 2.4.1.0
+            os: macOS-latest
+          - ghc: 8.8.3
+            cabal: 2.4.1.0
+            os: windows-latest
     name: Haskell GHC ${{ matrix.ghc }} sample
     steps:
       - uses: actions/checkout@v2
@@ -49,6 +65,13 @@ jobs:
           cabal-version: ${{ matrix.cabal }}
       - run: runhaskell Hello.hs
 ```
+
+## Inputs
+
+| Name            | Required | Description                         | Type   | Default |
+| --------------- | :------: | ----------------------------------- | ------ | ------- |
+| `ghc-version`   |          | GHC version to use, ex. `8.8.3`     | string | 8.8.3   |
+| `cabal-version` |          | Cabal version to use, ex. `3.0.0.0` | string | 3.0.0.0 |
 
 ## Version Support
 
@@ -72,12 +95,12 @@ jobs:
 
 **Cabal:**
 
-In general, cabal is almost always fully backwards compatible and so for most purposes, using the latest available cabal is sufficient.
-
 - `3.0.0.0` (default)
 - `2.4.1.0`
 - `2.4.0.0`
 - `2.2.0.0`
+
+Recommendation: Cabal is almost always fully backwards compatible and so for most purposes, using the latest available cabal is sufficient
 
 The full list of available versions of GHC and Cabal are as follows:
 
