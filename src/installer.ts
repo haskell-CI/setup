@@ -36,7 +36,7 @@ async function installTool(tool: Tool, version: string): Promise<void> {
     const tmp = path.join(process.env['RUNNER_TEMP'] || os.tmpdir(), 'haskell');
     await io.mkdirP(tmp);
     const cmd = ['choco', 'install', tool, '--version', version];
-    const flags = ['-m', '-r', '-c', tmp];
+    const flags = ['-m', '--no-progress', '-r', '-c', tmp];
     await exec('powershell', cmd.concat(flags));
 
     const t = `${tool}.${version}`;
