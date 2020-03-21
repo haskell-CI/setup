@@ -8601,7 +8601,7 @@ function installTool(tool, version) {
             const tmp = path.join(process.env['RUNNER_TEMP'] || os.tmpdir(), 'haskell');
             yield io.mkdirP(tmp);
             const cmd = ['choco', 'install', tool, '--version', version];
-            const flags = ['-m', '-r', '-c', tmp];
+            const flags = ['-m', '--no-progress', '-r', '-c', tmp];
             yield exec_1.exec('powershell', cmd.concat(flags));
             const t = `${tool}.${version}`;
             const p = ['lib', t, 'tools', t, tool === 'ghc' ? 'bin' : ''];
