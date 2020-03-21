@@ -8649,7 +8649,7 @@ async function installTool(tool, version) {
         core.addPath(path_1.join(process.env.ChocolateyInstall || '', ...p));
     }
     else {
-        const ghcup = await tc.downloadTool('https://gitlab.haskell.org/haskell/ghcup/raw/master/ghcup');
+        const ghcup = await tc.downloadTool('https://raw.githubusercontent.com/haskell/ghcup/master/ghcup');
         await fs_1.promises.chmod(ghcup, 0o755);
         await io.mkdirP(path_1.join(process.env.HOME || '', '.ghcup', 'bin'));
         await exec_1.exec(ghcup, [tool === 'ghc' ? 'install' : 'install-cabal', version]);

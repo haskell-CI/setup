@@ -133,7 +133,7 @@ async function installTool(tool: Tool, version: string): Promise<void> {
     core.addPath(join(process.env.ChocolateyInstall || '', ...p));
   } else {
     const ghcup = await tc.downloadTool(
-      'https://gitlab.haskell.org/haskell/ghcup/raw/master/ghcup'
+      'https://raw.githubusercontent.com/haskell/ghcup/master/ghcup'
     );
     await fs.chmod(ghcup, 0o755);
     await io.mkdirP(join(process.env.HOME || '', '.ghcup', 'bin'));
