@@ -97,7 +97,12 @@ export async function installStack(version: string): Promise<void> {
 
   const stack = await tc.downloadTool(`https://${url}.tar.gz`);
   const p = await tc.extractTar(stack);
-  const cachedTool = await tc.cacheDir(join(p, name), 'stack', version);
+  // Less hokey pokey than figuring out how to ./p/*/stack
+  const stackPath =
+    (await fs.readdir(p)).find(f =>
+      new RegExp(`${platformMap[process.platform]}$`).test(f)
+    ) || p;
+  const cachedTool = await tc.cacheDir(stackPath, 'stack', version);
   core.addPath(cachedTool);
 
   core.endGroup();
