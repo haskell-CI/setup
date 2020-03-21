@@ -1,28 +1,26 @@
 import * as core from '@actions/core';
-import {installGHC, installCabal} from './installer';
-import {safeLoad} from 'js-yaml';
-import {readFileSync} from 'fs';
-import {join} from 'path';
+import {getOpts, getDefaults} from './installer';
+import {exec} from '@actions/exec';
 
-const actionYml = safeLoad(
-  readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
-);
-const defaultGHCVersion = actionYml.inputs['ghc-version'].default;
-const defaultCabalVersion = actionYml.inputs['cabal-version'].default;
-
-async function run(): Promise<void> {
+(async () => {
   try {
-    core.info('Preparing to setup GHC and Cabal');
-    const ghcVersion = core.getInput('ghc-version') || defaultGHCVersion;
-    core.info(`Installing GHC version ${ghcVersion}`);
-    await installGHC(ghcVersion);
+    const opts = getOpts(getDefaults());
+    core.info('Preparing to setup a Haskell environment');
+    core.debug(`Options are: ${JSON.stringify(opts)}`);
 
-    const cabalVersion = core.getInput('cabal-version') || defaultCabalVersion;
-    core.info(`Installing Cabal version ${cabalVersion}`);
-    await installCabal(cabalVersion);
+    for (const [tool, o] of Object.entries(opts)) {
+      if (o.enable) {
+        core.info(`Installing ${tool} version ${o.version}`);
+        await o.install(o.version);
+      }
+    }
+
+    if (opts.stack.setup) {
+      core.startGroup('Pre-installing GHC with stack');
+      await exec('stack', ['setup', opts.ghc.version]);
+      core.endGroup();
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
-}
-
-run();
+})();
