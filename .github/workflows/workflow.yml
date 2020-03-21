@@ -43,3 +43,20 @@ jobs:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
       - run: runhaskell __tests__/hello.hs
+
+  install-stack:
+    name: Test Stack Install ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        stack: ['latest', '1.9.1']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ./
+        with:
+          stack-version: ${{ matrix.stack }}
+          stack-no-global: true
+      - run: stack
