@@ -8651,13 +8651,8 @@ async function installTool(tool, version) {
             .then(() => true)
             .catch(() => false);
         if (tool === 'ghc' && !installed) {
-            try {
-                // hvr's PPA has better support for GHC < 8.0
-                await exec_1.exec(`sudo -- sh -c "apt-get -y install ghc-${v}"`);
-            }
-            catch {
-                // oh well, we tried
-            }
+            // hvr's PPA has better support for GHC < 8.0
+            await exec_1.exec(`sudo -- sh -c "apt-get -y install ghc-${v}"`);
         }
         try {
             await fs_1.promises.access(p);
