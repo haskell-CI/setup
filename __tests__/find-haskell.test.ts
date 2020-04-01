@@ -1,4 +1,4 @@
-import {getOpts, getDefaults} from '../src/installer';
+import {getOpts, getDefaults} from '../src/opts';
 import {getInput} from '@actions/core';
 
 const def = getDefaults();

@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import {getOpts, getDefaults} from './installer';
+import {getOpts, getDefaults} from './opts';
 import {exec} from '@actions/exec';
 
 (async () => {
