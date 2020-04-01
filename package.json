@@ -5,15 +5,7 @@
   "description": "setup haskell action",
   "main": "src/setup-haskell.ts",
   "scripts": {
-    "check:type": "tsc",
-    "check:format": "prettier --check **/*.{ts,json,md}",
-    "check:lint": "eslint src/**/*.ts",
-    "test": "jest",
-    "format": "prettier --write **/*.{ts,json,md}",
-    "pack": "ncc build",
-    "_git-add": "git add dist",
-    "pre-push": "run-p check:* test",
-    "pre-commit": "npm-run-all format pack _git-add"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -46,15 +38,23 @@
     "husky": "^4.2.3",
     "jest": "^25.2.4",
     "jest-circus": "^25.2.4",
-    "npm-run-all": "^4.1.5",
+    "lint-staged": "^10.1.1",
     "prettier": "^2.0.2",
     "ts-jest": "^25.3.0",
     "typescript": "^3.8.3"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run pre-commit",
-      "pre-push": "npm run pre-push"
+      "pre-commit": "lint-staged",
+      "pre-push": "npm test"
     }
+  },
+  "lint-staged": {
+    "!(*test).{js,ts}": "eslint --cache --fix",
+    "!(*test).ts": [
+      "tsc",
+      "ncc build"
+    ],
+    "*.{js,ts,json,md}": "prettier --write"
   }
 }
