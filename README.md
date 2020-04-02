@@ -93,6 +93,7 @@ jobs:
 
 **GHC:**
 
+- `8.10.1`
 - `8.8.3` (default)
 - `8.8.2`
 - `8.8.1`
@@ -131,6 +132,10 @@ Recommendation: Cabal is almost always fully backwards compatible and so for mos
 - `1.6.1.1`
 - `1.5.1`
 - `1.5.0`
+- `1.4.0`
+- `1.3.2`
+- `1.3.0`
+- `1.2.0`
 
 Recommendation: Stack follows SemVer, and additionally attempts to remain backwards compatible across major versions whenever reasonable. Using the latest available version is almost always sufficient
 

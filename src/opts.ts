@@ -2,12 +2,14 @@ import * as core from '@actions/core';
 import {readFileSync} from 'fs';
 import {safeLoad} from 'js-yaml';
 import {join} from 'path';
-import {installStack, installCabal, installGHC} from './installer';
+
+export type OS = 'linux' | 'darwin' | 'win32';
+export type Tool = 'cabal' | 'ghc' | 'stack';
 
 export interface ProgramOpt {
   enable: boolean;
-  version: string;
-  install: (version: string) => Promise<void>;
+  exact: string;
+  resolved: string;
 }
 
 export interface Options {
@@ -16,32 +18,54 @@ export interface Options {
   stack: ProgramOpt & {setup: boolean};
 }
 
-export interface Defaults {
-  ghc: {version: string};
-  cabal: {version: string};
-}
+export type Defaults = Record<Tool, {version: string; supported: string[]}>;
 
 export function getDefaults(): Defaults {
   const actionYml = safeLoad(
     readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
   );
+  const env = actionYml.runs.env;
   return {
-    ghc: {version: actionYml.inputs['ghc-version'].default},
-    cabal: {version: actionYml.inputs['cabal-version'].default}
+    ghc: {
+      version: actionYml.inputs['ghc-version'].default,
+      supported: JSON.parse(env.supported_ghc_versions)
+    },
+    cabal: {
+      version: actionYml.inputs['cabal-version'].default,
+      supported: JSON.parse(env.supported_cabal_versions)
+    },
+    stack: {
+      version: 'latest',
+      supported: JSON.parse(env.supported_stack_versions)
+    }
   };
 }
 
-export function getOpts(def: Defaults): Options {
+function resolve(version: string, supported: string[]): string {
+  const ver =
+    version === 'latest'
+      ? supported[0]
+      : supported.find(v => v.startsWith(version)) ?? version;
+
+  core.info(`Resolved ${version} to ${ver}`);
+  return ver;
+}
+
+export function getOpts({ghc, cabal, stack}: Defaults): Options {
   const stackNoGlobal = core.getInput('stack-no-global') !== '';
-  const stackVersion = core.getInput('stack-version');
   const stackSetupGhc = core.getInput('stack-setup-ghc') !== '';
+  const verInpt = {
+    ghc: core.getInput('ghc-version') || ghc.version,
+    cabal: core.getInput('cabal-version') || cabal.version,
+    stack: core.getInput('stack-version')
+  };
 
   const errors = [];
-  if (stackNoGlobal && stackVersion === '') {
+  if (stackNoGlobal && verInpt.stack === '') {
     errors.push('stack-version is required if stack-no-global is set');
   }
 
-  if (stackSetupGhc && stackVersion === '') {
+  if (stackSetupGhc && verInpt.stack === '') {
     errors.push('stack-version is required if stack-setup-ghc is set');
   }
 
@@ -51,19 +75,19 @@ export function getOpts(def: Defaults): Options {
 
   return {
     ghc: {
-      version: core.getInput('ghc-version') || def.ghc.version,
-      enable: !stackNoGlobal,
-      install: installGHC
+      exact: verInpt.ghc,
+      resolved: resolve(verInpt.ghc, ghc.supported),
+      enable: !stackNoGlobal
     },
     cabal: {
-      version: core.getInput('cabal-version') || def.cabal.version,
-      enable: !stackNoGlobal,
-      install: installCabal
+      exact: verInpt.cabal,
+      resolved: resolve(verInpt.cabal, cabal.supported),
+      enable: !stackNoGlobal
     },
     stack: {
-      version: stackVersion,
-      enable: stackVersion !== '',
-      install: installStack,
+      exact: verInpt.stack,
+      resolved: resolve(verInpt.stack, stack.supported),
+      enable: verInpt.stack !== '',
       setup: core.getInput('stack-setup-ghc') !== ''
     }
   };

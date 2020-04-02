@@ -9,7 +9,12 @@ const environments = {
   stacklatest: {'stack-version': 'latest'},
   stackOnly: {'stack-version': 'latest', 'stack-no-global': 'true'},
   stackOnlyWrong: {'stack-no-global': 'true'},
-  stackOnlyWrong2: {'stack-setup-ghc': 'true'}
+  stackOnlyWrong2: {'stack-setup-ghc': 'true'},
+  resolveVersion: {
+    'stack-version': '2.1',
+    'ghc-version': '8.6',
+    'cabal-version': '2.4'
+  }
 };
 
 const mkName = (s: string): string =>
@@ -37,6 +42,10 @@ describe('actions/setup-haskell', () => {
     expect(def.cabal.version).toBe('3.0.0.0');
   });
 
+  it('Parses action.yml to get supported versions as an array', () => {
+    expect(Array.isArray(def.cabal.supported)).toBe(true);
+  });
+
   it('[meta] Setup Env works', () => {
     setupEnv({input: 'value'});
     const i = getInput('input');
@@ -46,7 +55,25 @@ describe('actions/setup-haskell', () => {
   it('getOpts grabs defaults correctly from environment', () => {
     setupEnv(environments.empty);
     const options = getOpts(def);
-    expect(options.ghc.version).toBe(def.ghc.version);
+    expect(options.ghc.exact).toBe(def.ghc.version);
+  });
+
+  it('GHC versions resolve correctly', () => {
+    setupEnv(environments.resolveVersion);
+    const options = getOpts(def);
+    expect(options.ghc.resolved).toBe('8.6.5');
+  });
+
+  it('Cabal versions resolve correctly', () => {
+    setupEnv(environments.resolveVersion);
+    const options = getOpts(def);
+    expect(options.cabal.resolved).toBe('2.4.1.0');
+  });
+
+  it('Stack versions resolve correctly', () => {
+    setupEnv(environments.resolveVersion);
+    const options = getOpts(def);
+    expect(options.stack.resolved).toBe('2.1.3');
   });
 
   it('Enabling stack does not disable GHC', () => {

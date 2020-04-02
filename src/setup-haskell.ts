@@ -1,23 +1,28 @@
 import * as core from '@actions/core';
-import {getOpts, getDefaults} from './opts';
+import {getOpts, getDefaults, Tool} from './opts';
+import {installTool} from './installer';
+import type {OS} from './opts';
 import {exec} from '@actions/exec';
 
 (async () => {
   try {
-    const opts = getOpts(getDefaults());
     core.info('Preparing to setup a Haskell environment');
+
+    const opts = getOpts(getDefaults());
     core.debug(`Options are: ${JSON.stringify(opts)}`);
 
-    for (const [tool, o] of Object.entries(opts)) {
-      if (o.enable) {
-        core.info(`Installing ${tool} version ${o.version}`);
-        await o.install(o.version);
-      }
+    for (const [tool, {resolved}] of Object.entries(opts).filter(
+      o => o[1].enable
+    )) {
+      core.startGroup(`Installing ${tool}`);
+      core.info(`Installing ${tool} version ${resolved}`);
+      await installTool(tool as Tool, resolved, process.platform as OS);
+      core.endGroup();
     }
 
     if (opts.stack.setup) {
       core.startGroup('Pre-installing GHC with stack');
-      await exec('stack', ['setup', opts.ghc.version]);
+      await exec('stack', ['setup', opts.ghc.resolved]);
       core.endGroup();
     }
 
@@ -35,5 +40,6 @@ import {exec} from '@actions/exec';
     }
   } catch (error) {
     core.setFailed(error.message);
+    core.endGroup();
   }
 })();
