@@ -745,7 +745,7 @@ const supported_versions = __importStar(__webpack_require__(447));
 function getDefaults() {
     const inpts = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')).inputs;
     const mkVersion = (v, vs) => ({
-        version: resolve(inpts[v].default, vs),
+        version: resolve(inpts[v].default, vs, true),
         supported: vs
     });
     return {
@@ -755,12 +755,12 @@ function getDefaults() {
     };
 }
 exports.getDefaults = getDefaults;
-function resolve(version, supported) {
+function resolve(version, supported, def = false) {
     var _a;
     const ver = version === 'latest'
         ? supported[0]
         : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
-    if (ver !== version)
+    if (ver !== version && !def)
         core.info(`Resolved ${version} to ${ver}`);
     return ver;
 }

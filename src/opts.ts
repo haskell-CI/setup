@@ -28,7 +28,7 @@ export function getDefaults(): Defaults {
   ).inputs;
 
   const mkVersion = (v: string, vs: string[]): Version => ({
-    version: resolve(inpts[v].default, vs),
+    version: resolve(inpts[v].default, vs, true),
     supported: vs
   });
 
@@ -39,13 +39,13 @@ export function getDefaults(): Defaults {
   };
 }
 
-function resolve(version: string, supported: string[]): string {
+function resolve(version: string, supported: string[], def = false): string {
   const ver =
     version === 'latest'
       ? supported[0]
       : supported.find(v => v.startsWith(version)) ?? version;
 
-  if (ver !== version) core.info(`Resolved ${version} to ${ver}`);
+  if (ver !== version && !def) core.info(`Resolved ${version} to ${ver}`);
   return ver;
 }
 
