@@ -28,7 +28,7 @@ export function getDefaults(): Defaults {
   ).inputs;
 
   const mkVersion = (v: string, vs: string[]): Version => ({
-    version: resolve(inpts[v].default, vs, true),
+    version: resolve(inpts[v].default, vs),
     supported: vs
   });
 
@@ -39,14 +39,10 @@ export function getDefaults(): Defaults {
   };
 }
 
-function resolve(version: string, supported: string[], def = false): string {
-  const ver =
-    version === 'latest'
-      ? supported[0]
-      : supported.find(v => v.startsWith(version)) ?? version;
-
-  if (ver !== version && !def) core.info(`Resolved ${version} to ${ver}`);
-  return ver;
+function resolve(version: string, supported: string[]): string {
+  return version === 'latest'
+    ? supported[0]
+    : supported.find(v => v.startsWith(version)) ?? version;
 }
 
 export function getOpts({ghc, cabal, stack}: Defaults): Options {
@@ -90,6 +86,12 @@ export function getOpts({ghc, cabal, stack}: Defaults): Options {
       setup: core.getInput('stack-setup-ghc') !== ''
     }
   };
+
+  // eslint-disable-next-line github/array-foreach
+  Object.values(opts)
+    .filter(t => t.enable && t.raw !== t.resolved)
+    .forEach(t => core.info(`Resolved ${t.raw} to ${t.resolved}`));
+
   core.debug(`Options are: ${JSON.stringify(opts)}`);
   return opts;
 }

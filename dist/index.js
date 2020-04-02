@@ -745,7 +745,7 @@ const supported_versions = __importStar(__webpack_require__(447));
 function getDefaults() {
     const inpts = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')).inputs;
     const mkVersion = (v, vs) => ({
-        version: resolve(inpts[v].default, vs, true),
+        version: resolve(inpts[v].default, vs),
         supported: vs
     });
     return {
@@ -755,14 +755,11 @@ function getDefaults() {
     };
 }
 exports.getDefaults = getDefaults;
-function resolve(version, supported, def = false) {
+function resolve(version, supported) {
     var _a;
-    const ver = version === 'latest'
+    return version === 'latest'
         ? supported[0]
         : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
-    if (ver !== version && !def)
-        core.info(`Resolved ${version} to ${ver}`);
-    return ver;
 }
 function getOpts({ ghc, cabal, stack }) {
     const stackNoGlobal = core.getInput('stack-no-global') !== '';
@@ -801,6 +798,10 @@ function getOpts({ ghc, cabal, stack }) {
             setup: core.getInput('stack-setup-ghc') !== ''
         }
     };
+    // eslint-disable-next-line github/array-foreach
+    Object.values(opts)
+        .filter(t => t.enable && t.raw !== t.resolved)
+        .forEach(t => core.info(`Resolved ${t.raw} to ${t.resolved}`));
     core.debug(`Options are: ${JSON.stringify(opts)}`);
     return opts;
 }
