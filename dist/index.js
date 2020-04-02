@@ -10692,7 +10692,9 @@ async function stack(version, os) {
         ? `https://get.haskellstack.org/stable/${build}.tar.gz`
         : `https://github.com/commercialhaskell/stack/releases/download/v${version}/stack-${version}-${build}.tar.gz`;
     const p = await tc.downloadTool(`${url}`).then(tc.extractTar);
-    const [stackPath] = await glob_1.create(`${p}/stack*/stack`).then(async (g) => g.glob());
+    const [stackPath] = await glob_1.create(`${p}/stack*`, {
+        implicitDescendants: false
+    }).then(async (g) => g.glob());
     const path = await tc.cacheDir(stackPath, 'stack', version);
     if (await checkInstalled('stack', version, path))
         return true;
