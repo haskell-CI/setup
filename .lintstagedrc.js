@@ -1,5 +1,6 @@
 module.exports = {
   '!(*test).{js,ts}': 'eslint --cache --fix',
-  '!(*test).ts': () => ['tsc', 'ncc build', 'git add dist'],
+  '!(*test).ts': () => ['ncc build', 'git add dist'],
+  'src/**/*.ts': ['tsc'],
   '*.{js,ts,json,md}': 'prettier --write'
 };
