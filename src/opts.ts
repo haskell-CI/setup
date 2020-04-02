@@ -47,7 +47,7 @@ function resolve(version: string, supported: string[]): string {
       ? supported[0]
       : supported.find(v => v.startsWith(version)) ?? version;
 
-  core.info(`Resolved ${version} to ${ver}`);
+  if (ver !== version) core.info(`Resolved ${version} to ${ver}`);
   return ver;
 }
 
@@ -73,7 +73,7 @@ export function getOpts({ghc, cabal, stack}: Defaults): Options {
     throw new Error(errors.join('\n'));
   }
 
-  return {
+  const opts: Options = {
     ghc: {
       exact: verInpt.ghc,
       resolved: resolve(verInpt.ghc, ghc.supported),
@@ -91,4 +91,6 @@ export function getOpts({ghc, cabal, stack}: Defaults): Options {
       setup: core.getInput('stack-setup-ghc') !== ''
     }
   };
+  core.debug(`Options are: ${JSON.stringify(opts)}`);
+  return opts;
 }
