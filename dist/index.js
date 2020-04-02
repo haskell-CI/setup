@@ -10616,7 +10616,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const exec_1 = __webpack_require__(986);
 const glob_1 = __webpack_require__(281);
-const io = __importStar(__webpack_require__(1));
 const tc = __importStar(__webpack_require__(533));
 const fs_1 = __webpack_require__(747);
 const path_1 = __webpack_require__(622);
@@ -10640,7 +10639,10 @@ function warn(tool, version) {
 }
 async function checkInstalled(tool, version, path) {
     const installedPath = tc.find(tool, version) ||
-        (await (path ? fs_1.promises.access(path).then(() => path) : io.which(tool)).catch(() => false));
+        (await fs_1.promises
+            .access(`${path}`)
+            .then(() => path)
+            .catch());
     if (installedPath) {
         core.addPath(installedPath);
         core.info(`Found in cache: ${tool} ${version}. Setup successful.`);

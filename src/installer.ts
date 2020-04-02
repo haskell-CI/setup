@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
 import {exec} from '@actions/exec';
 import {create as glob} from '@actions/glob';
-import * as io from '@actions/io';
 import * as tc from '@actions/tool-cache';
 import {promises as fs} from 'fs';
 import {join} from 'path';
@@ -37,9 +36,10 @@ async function checkInstalled(
 ): Promise<boolean> {
   const installedPath =
     tc.find(tool, version) ||
-    (await (path ? fs.access(path).then(() => path) : io.which(tool)).catch(
-      () => false as const
-    ));
+    (await fs
+      .access(`${path}`)
+      .then(() => path)
+      .catch());
 
   if (installedPath) {
     core.addPath(installedPath);
