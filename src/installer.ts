@@ -37,9 +37,9 @@ async function checkInstalled(
   const installedPath =
     tc.find(tool, version) ||
     (await fs
-      .access(`${path}`)
+      .access(path || '')
       .then(() => path)
-      .catch());
+      .catch(() => undefined));
 
   if (installedPath) {
     core.addPath(installedPath);

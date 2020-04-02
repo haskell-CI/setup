@@ -10640,9 +10640,9 @@ function warn(tool, version) {
 async function checkInstalled(tool, version, path) {
     const installedPath = tc.find(tool, version) ||
         (await fs_1.promises
-            .access(`${path}`)
+            .access(path || '')
             .then(() => path)
-            .catch());
+            .catch(() => undefined));
     if (installedPath) {
         core.addPath(installedPath);
         core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
