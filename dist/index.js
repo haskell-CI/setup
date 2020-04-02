@@ -10663,9 +10663,6 @@ async function checkInstalled(tool, version, path) {
     }
     return !!installedPath;
 }
-exports.installCabal = async (version, os) => installTool('cabal', version, os);
-exports.installGHC = async (version, os) => installTool('ghc', version, os);
-exports.installStack = async (version, os) => installTool('stack', version, os);
 async function installTool(tool, version, os) {
     if (await checkInstalled(tool, version))
         return;

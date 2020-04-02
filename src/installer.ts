@@ -49,15 +49,6 @@ async function checkInstalled(
   return !!installedPath;
 }
 
-export const installCabal = async (version: string, os: OS): Promise<void> =>
-  installTool('cabal', version, os);
-
-export const installGHC = async (version: string, os: OS): Promise<void> =>
-  installTool('ghc', version, os);
-
-export const installStack = async (version: string, os: OS): Promise<void> =>
-  installTool('stack', version, os);
-
 export async function installTool(
   tool: Tool,
   version: string,
