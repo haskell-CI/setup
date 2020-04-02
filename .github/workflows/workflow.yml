@@ -74,4 +74,5 @@ jobs:
         with:
           enable-stack: true
           stack-no-global: true
+          stack-version: ${{ matrix.stack }}
       - run: stack
