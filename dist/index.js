@@ -743,20 +743,15 @@ const js_yaml_1 = __webpack_require__(414);
 const path_1 = __webpack_require__(622);
 const supported_versions = __importStar(__webpack_require__(447));
 function getDefaults() {
-    const actionYml = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8'));
+    const inpts = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')).inputs;
+    const mkVersion = (v, vs) => ({
+        version: resolve(inpts[v].default, vs),
+        supported: vs
+    });
     return {
-        ghc: {
-            version: actionYml.inputs['ghc-version'].default,
-            supported: supported_versions.ghc
-        },
-        cabal: {
-            version: actionYml.inputs['cabal-version'].default,
-            supported: supported_versions.cabal
-        },
-        stack: {
-            version: 'latest',
-            supported: supported_versions.stack
-        }
+        ghc: mkVersion('ghc-version', supported_versions.ghc),
+        cabal: mkVersion('cabal-version', supported_versions.cabal),
+        stack: mkVersion('stack-version', supported_versions.stack)
     };
 }
 exports.getDefaults = getDefaults;
@@ -772,36 +767,37 @@ function resolve(version, supported) {
 function getOpts({ ghc, cabal, stack }) {
     const stackNoGlobal = core.getInput('stack-no-global') !== '';
     const stackSetupGhc = core.getInput('stack-setup-ghc') !== '';
+    const stackEnable = core.getInput('enable-stack') !== '';
     const verInpt = {
         ghc: core.getInput('ghc-version') || ghc.version,
         cabal: core.getInput('cabal-version') || cabal.version,
-        stack: core.getInput('stack-version')
+        stack: core.getInput('stack-version') || stack.version
     };
     const errors = [];
-    if (stackNoGlobal && verInpt.stack === '') {
-        errors.push('stack-version is required if stack-no-global is set');
+    if (stackNoGlobal && !stackEnable) {
+        errors.push('enable-stack is required if stack-no-global is set');
     }
-    if (stackSetupGhc && verInpt.stack === '') {
-        errors.push('stack-version is required if stack-setup-ghc is set');
+    if (stackSetupGhc && !stackEnable) {
+        errors.push('enable-stack is required if stack-setup-ghc is set');
     }
     if (errors.length > 0) {
         throw new Error(errors.join('\n'));
     }
     const opts = {
         ghc: {
-            exact: verInpt.ghc,
+            raw: verInpt.ghc,
             resolved: resolve(verInpt.ghc, ghc.supported),
             enable: !stackNoGlobal
         },
         cabal: {
-            exact: verInpt.cabal,
+            raw: verInpt.cabal,
             resolved: resolve(verInpt.cabal, cabal.supported),
             enable: !stackNoGlobal
         },
         stack: {
-            exact: verInpt.stack,
+            raw: verInpt.stack,
             resolved: resolve(verInpt.stack, stack.supported),
-            enable: verInpt.stack !== '',
+            enable: stackEnable,
             setup: core.getInput('stack-setup-ghc') !== ''
         }
     };
@@ -2587,7 +2583,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["8.10.1","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.2.1","8.0.2","8.0.1","7.10.3"],"cabal":["3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["8.10.1","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 

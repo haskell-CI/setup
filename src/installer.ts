@@ -64,10 +64,12 @@ export async function installTool(
   let v;
   switch (os) {
     case 'linux':
-      // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
-      v = tool === 'cabal' ? version.slice(0, 3) : version;
-      if (await checkInstalled(tool, v, join('/opt', tool, v, 'bin'))) return;
-      warn(tool, v);
+      if (tool === 'cabal') {
+        // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
+        v = version.slice(0, 3);
+        if (await checkInstalled(tool, v, join('/opt', tool, v, 'bin'))) return;
+        warn(tool, v);
+      }
       if ((await apt(tool, version)) || (await ghcup(tool, version))) return;
       break;
     case 'win32':
