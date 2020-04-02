@@ -765,7 +765,8 @@ function resolve(version, supported) {
     const ver = version === 'latest'
         ? supported[0]
         : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
-    core.info(`Resolved ${version} to ${ver}`);
+    if (ver !== version)
+        core.info(`Resolved ${version} to ${ver}`);
     return ver;
 }
 function getOpts({ ghc, cabal, stack }) {
@@ -786,7 +787,7 @@ function getOpts({ ghc, cabal, stack }) {
     if (errors.length > 0) {
         throw new Error(errors.join('\n'));
     }
-    return {
+    const opts = {
         ghc: {
             exact: verInpt.ghc,
             resolved: resolve(verInpt.ghc, ghc.supported),
@@ -804,6 +805,8 @@ function getOpts({ ghc, cabal, stack }) {
             setup: core.getInput('stack-setup-ghc') !== ''
         }
     };
+    core.debug(`Options are: ${JSON.stringify(opts)}`);
+    return opts;
 }
 exports.getOpts = getOpts;
 
@@ -8425,34 +8428,18 @@ const exec_1 = __webpack_require__(986);
     try {
         core.info('Preparing to setup a Haskell environment');
         const opts = opts_1.getOpts(opts_1.getDefaults());
-        core.debug(`Options are: ${JSON.stringify(opts)}`);
-        for (const [tool, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
-            core.startGroup(`Installing ${tool}`);
-            core.info(`Installing ${tool} version ${resolved}`);
-            await installer_1.installTool(tool, resolved, process.platform);
-            core.endGroup();
-        }
-        if (opts.stack.setup) {
-            core.startGroup('Pre-installing GHC with stack');
-            await exec_1.exec('stack', ['setup', opts.ghc.resolved]);
-            core.endGroup();
-        }
-        if (opts.cabal.enable) {
-            core.startGroup('Setting up cabal');
-            await exec_1.exec('cabal', [
-                'user-config',
-                'update',
-                '-a',
-                'http-transport: plain-http',
-                '-v3'
-            ]);
-            await exec_1.exec('cabal', ['update']);
-            core.endGroup();
-        }
+        for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable))
+            await core.group(`Installing ${t} version ${resolved}`, async () => installer_1.installTool(t, resolved, process.platform));
+        if (opts.stack.setup)
+            await core.group('Pre-installing GHC with stack', async () => exec_1.exec('stack', ['setup', opts.ghc.resolved]));
+        if (opts.cabal.enable)
+            await core.group('Setting up cabal', async () => {
+                await exec_1.exec('cabal user-config update -a "http-transport: plain-http" -v3');
+                await exec_1.exec('cabal', ['update']);
+            });
     }
     catch (error) {
         core.setFailed(error.message);
-        core.endGroup();
     }
 })();
 
@@ -10673,11 +10660,13 @@ async function installTool(tool, version, os) {
     let v;
     switch (os) {
         case 'linux':
-            // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
-            v = tool === 'cabal' ? version.slice(0, 3) : version;
-            if (await checkInstalled(tool, v, path_1.join('/opt', tool, v, 'bin')))
-                return;
-            warn(tool, v);
+            if (tool === 'cabal') {
+                // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
+                v = version.slice(0, 3);
+                if (await checkInstalled(tool, v, path_1.join('/opt', tool, v, 'bin')))
+                    return;
+                warn(tool, v);
+            }
             if ((await apt(tool, version)) || (await ghcup(tool, version)))
                 return;
             break;
