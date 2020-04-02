@@ -64,13 +64,11 @@ export async function installTool(
   let v;
   switch (os) {
     case 'linux':
-      if (tool === 'cabal') {
-        // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
-        v = version.slice(0, 3);
-        if (await checkInstalled(tool, v, join('/opt', tool, v, 'bin'))) return;
-        warn(tool, v);
-      }
-      if ((await apt(tool, version)) || (await ghcup(tool, version))) return;
+      // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
+      v = tool === 'cabal' ? version.slice(0, 3) : version;
+      if (await checkInstalled(tool, v, join('/opt', tool, v, 'bin'))) return;
+      warn(tool, v);
+      if ((await apt(tool, v)) || (await ghcup(tool, version))) return;
       break;
     case 'win32':
       warn(tool, version);
@@ -113,7 +111,8 @@ async function apt(tool: Tool, version: string): Promise<boolean> {
   const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
   await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${version}"`);
 
-  if (await checkInstalled(tool, version)) return true;
+  if (await checkInstalled(tool, version, `/opt/${tool}/${version}/bin`))
+    return true;
   core.info(`${tool} ${version} could not be installed with apt-get.`);
   return false;
 }
