@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import {readFileSync} from 'fs';
 import {safeLoad} from 'js-yaml';
 import {join} from 'path';
+import * as supported_versions from './versions.json';
 
 export type OS = 'linux' | 'darwin' | 'win32';
 export type Tool = 'cabal' | 'ghc' | 'stack';
@@ -24,19 +25,18 @@ export function getDefaults(): Defaults {
   const actionYml = safeLoad(
     readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
   );
-  const env = actionYml.runs.env;
   return {
     ghc: {
       version: actionYml.inputs['ghc-version'].default,
-      supported: JSON.parse(env.supported_ghc_versions)
+      supported: supported_versions.ghc
     },
     cabal: {
       version: actionYml.inputs['cabal-version'].default,
-      supported: JSON.parse(env.supported_cabal_versions)
+      supported: supported_versions.cabal
     },
     stack: {
       version: 'latest',
-      supported: JSON.parse(env.supported_stack_versions)
+      supported: supported_versions.stack
     }
   };
 }

@@ -741,21 +741,21 @@ const core = __importStar(__webpack_require__(470));
 const fs_1 = __webpack_require__(747);
 const js_yaml_1 = __webpack_require__(414);
 const path_1 = __webpack_require__(622);
+const supported_versions = __importStar(__webpack_require__(447));
 function getDefaults() {
     const actionYml = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8'));
-    const env = actionYml.runs.env;
     return {
         ghc: {
             version: actionYml.inputs['ghc-version'].default,
-            supported: JSON.parse(env.supported_ghc_versions)
+            supported: supported_versions.ghc
         },
         cabal: {
             version: actionYml.inputs['cabal-version'].default,
-            supported: JSON.parse(env.supported_cabal_versions)
+            supported: supported_versions.cabal
         },
         stack: {
             version: 'latest',
-            supported: JSON.parse(env.supported_stack_versions)
+            supported: supported_versions.stack
         }
     };
 }
@@ -2578,6 +2578,13 @@ function escapeProperty(s) {
         .replace(/,/g, '%2C');
 }
 //# sourceMappingURL=command.js.map
+
+/***/ }),
+
+/***/ 447:
+/***/ (function(module) {
+
+module.exports = {"ghc":["8.10.1","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.2.1","8.0.2","8.0.1","7.10.3"],"cabal":["3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 

@@ -15,7 +15,8 @@
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "resolveJsonModule": true
   },
   "exclude": ["node_modules", "**/*.test.ts"]
 }
