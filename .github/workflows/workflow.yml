@@ -58,6 +58,9 @@ jobs:
       - run: runhaskell __tests__/hello.hs
       - shell: bash
         run: cd __tests__/project && cabal build && cabal run
+      - run: |
+          cabal --version
+          ghc --version
 
   install-stack:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}
@@ -75,4 +78,6 @@ jobs:
           enable-stack: true
           stack-no-global: true
           stack-version: ${{ matrix.stack }}
-      - run: stack
+      - run: |
+          stack --version
+          stack
