@@ -57,8 +57,7 @@ export async function installTool(
 
   if (tool === 'stack') {
     warn(tool, version);
-    if (await stack(version, os)) return;
-    return failed(tool, version);
+    return void ((await stack(version, os)) || failed(tool, version));
   }
 
   let v;
@@ -98,7 +97,6 @@ async function stack(version: string, os: OS): Promise<boolean> {
   const [stackPath] = await glob(`${p}/stack*`, {
     implicitDescendants: false
   }).then(async g => g.glob());
-  core.info(`stack path is: ${stackPath}`);
   const path = await tc.cacheDir(stackPath, 'stack', version);
 
   if (await isInstalled('stack', version, path)) return true;
@@ -140,13 +138,9 @@ async function choco(tool: Tool, version: string): Promise<boolean> {
 async function ghcup(tool: Tool, version: string): Promise<boolean> {
   core.info(`Attempting to install ${tool} ${version} using ghcup`);
 
-  const url = 'https://raw.githubusercontent.com/haskell/ghcup/master/ghcup';
-  const binPath =
-    tc.find('ghcup', '1.0.0') ||
-    (await tc
-      .cacheFile(await tc.downloadTool(url), 'ghcup', 'ghcup', '1.0.0')
-      .then(async f => fs.chmod(f, 0o755)));
-  const bin = `${binPath}/ghcup`;
+  const bin = await tc.downloadTool(
+    'https://raw.githubusercontent.com/haskell/ghcup/master/ghcup'
+  );
 
   await exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
   if (tool === 'ghc') await exec(bin, ['set', version]);
