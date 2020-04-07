@@ -141,6 +141,7 @@ async function ghcup(tool: Tool, version: string): Promise<boolean> {
   const bin = await tc.downloadTool(
     'https://raw.githubusercontent.com/haskell/ghcup/master/ghcup'
   );
+  await fs.chmod(bin, 0o755);
 
   await exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
   if (tool === 'ghc') await exec(bin, ['set', version]);

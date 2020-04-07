@@ -10729,6 +10729,7 @@ async function choco(tool, version) {
 async function ghcup(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
     const bin = await tc.downloadTool('https://raw.githubusercontent.com/haskell/ghcup/master/ghcup');
+    await fs_1.promises.chmod(bin, 0o755);
     await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
     if (tool === 'ghc')
         await exec_1.exec(bin, ['set', version]);
