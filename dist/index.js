@@ -10617,12 +10617,11 @@ const core = __importStar(__webpack_require__(470));
 const exec_1 = __webpack_require__(986);
 const glob_1 = __webpack_require__(281);
 const tc = __importStar(__webpack_require__(533));
+const io_1 = __webpack_require__(1);
 const fs_1 = __webpack_require__(747);
 const path_1 = __webpack_require__(622);
 function failed(tool, version) {
-    const msg = `All install methods for ${tool} ${version} failed`;
-    core.setFailed(msg);
-    throw new Error(msg);
+    throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 function warn(tool, version) {
     const policy = {
@@ -10637,7 +10636,7 @@ function warn(tool, version) {
         'If the list is outdated, please file an issue here: https://github.com/actions/virtual-environments\n' +
         'by using the appropriate tool request template: https://github.com/actions/virtual-environments/issues/new/choose');
 }
-async function checkInstalled(tool, version, path) {
+async function isInstalled(tool, version, path) {
     const installedPath = tc.find(tool, version) ||
         (await fs_1.promises
             .access(path || '')
@@ -10650,7 +10649,7 @@ async function checkInstalled(tool, version, path) {
     return !!installedPath;
 }
 async function installTool(tool, version, os) {
-    if (await checkInstalled(tool, version))
+    if (await isInstalled(tool, version))
         return;
     if (tool === 'stack') {
         warn(tool, version);
@@ -10661,7 +10660,7 @@ async function installTool(tool, version, os) {
         case 'linux':
             // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
             v = tool === 'cabal' ? version.slice(0, 3) : version;
-            if (await checkInstalled(tool, v, path_1.join('/opt', tool, v, 'bin')))
+            if (await isInstalled(tool, v, path_1.join('/opt', tool, v, 'bin')))
                 return;
             warn(tool, v);
             if ((await apt(tool, v)) || (await ghcup(tool, version)))
@@ -10696,7 +10695,7 @@ async function stack(version, os) {
         implicitDescendants: false
     }).then(async (g) => g.glob());
     const path = await tc.cacheDir(stackPath, 'stack', version);
-    if (await checkInstalled('stack', version, path))
+    if (await isInstalled('stack', version, path))
         return true;
     core.info(`stack ${version} could not be installed.`);
     return false;
@@ -10705,7 +10704,7 @@ async function apt(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using apt-get`);
     const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
     await exec_1.exec(`sudo -- sh -c "apt-get -y install ${toolName}-${version}"`);
-    if (await checkInstalled(tool, version, `/opt/${tool}/${version}/bin`))
+    if (await isInstalled(tool, version, `/opt/${tool}/${version}/bin`))
         return true;
     core.info(`${tool} ${version} could not be installed with apt-get.`);
     return false;
@@ -10722,7 +10721,7 @@ async function choco(tool, version) {
         '--no-progress',
         '-r'
     ]);
-    if (await checkInstalled(tool, version))
+    if (await isInstalled(tool, version, path_1.dirname(await io_1.which(tool))))
         return true;
     core.info(`${tool} ${version} could not be installed with chocolatey.`);
     return false;
@@ -10730,12 +10729,13 @@ async function choco(tool, version) {
 async function ghcup(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
     const url = 'https://raw.githubusercontent.com/haskell/ghcup/master/ghcup';
-    const bin = tc.find('ghcup', '1.0.0') ||
+    const binPath = tc.find('ghcup', '1.0.0') ||
         (await tc.cacheFile(await tc.downloadTool(url), 'ghcup', 'ghcup', '1.0.0'));
+    const bin = `${binPath}/ghcup`;
     await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
     if (tool === 'ghc')
         await exec_1.exec(bin, ['set', version]);
-    if (await checkInstalled(tool, version, `${process.env.HOME}/.ghcup/bin`))
+    if (await isInstalled(tool, version, `${process.env.HOME}/.ghcup/bin`))
         return true;
     core.info(`${tool} ${version} could not be installed with ghcup.`);
     return false;
