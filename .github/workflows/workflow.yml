@@ -66,6 +66,7 @@ jobs:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         stack: ['latest', '1.9.1']
