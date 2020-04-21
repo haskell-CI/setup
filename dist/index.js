@@ -10656,7 +10656,7 @@ async function isInstalled(tool, version, os) {
         return success(tool, version, toolPath);
     const stackPath = os === 'win32'
         ? path_1.join(`${process.env.APPDATA}`, 'local', 'bin')
-        : '/usr/local/bin';
+        : `${process.env.HOME}/.local/bin`;
     const ghcupPath = `${process.env.HOME}/.ghcup/bin`;
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
     const aptPath = `/opt/${tool}/${v}/bin`;
@@ -10679,7 +10679,7 @@ async function isInstalled(tool, version, os) {
             .access(p || '')
             .then(() => p)
             .catch(() => undefined);
-        if (installedPath)
+        if (installedPath && (await io_1.which(tool)))
             return success(tool, version, installedPath);
     }
     return false;

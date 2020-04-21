@@ -53,7 +53,7 @@ async function isInstalled(
   const stackPath =
     os === 'win32'
       ? join(`${process.env.APPDATA}`, 'local', 'bin')
-      : '/usr/local/bin';
+      : `${process.env.HOME}/.local/bin`;
 
   const ghcupPath = `${process.env.HOME}/.ghcup/bin`;
 
@@ -89,7 +89,8 @@ async function isInstalled(
       .then(() => p)
       .catch(() => undefined);
 
-    if (installedPath) return success(tool, version, installedPath);
+    if (installedPath && (await which(tool)))
+      return success(tool, version, installedPath);
   }
 
   return false;
