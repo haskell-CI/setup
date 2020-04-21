@@ -10615,12 +10615,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const exec_1 = __webpack_require__(986);
+const io_1 = __webpack_require__(1);
 const glob_1 = __webpack_require__(281);
 const tc = __importStar(__webpack_require__(533));
 const fs_1 = __webpack_require__(747);
 const path_1 = __webpack_require__(622);
 function failed(tool, version) {
     throw new Error(`All install methods for ${tool} ${version} failed`);
+}
+async function success(tool, version, path) {
+    core.addPath(path);
+    core.setOutput(`${tool}-path`, path);
+    core.setOutput(`${tool}-exe`, await io_1.which(tool));
+    core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
+    return true;
 }
 function warn(tool, version) {
     const policy = {
@@ -10636,8 +10644,9 @@ function warn(tool, version) {
         'by using the appropriate tool request template: https://github.com/actions/virtual-environments/issues/new/choose');
 }
 async function isInstalled(tool, version, os) {
-    if (tc.find(tool, version))
-        return true;
+    const toolPath = tc.find(tool, version);
+    if (toolPath)
+        return success(tool, version, toolPath);
     const stackPath = os === 'win32'
         ? path_1.join(`${process.env.APPDATA}`, 'local', 'bin')
         : '/usr/local/bin';
@@ -10663,11 +10672,8 @@ async function isInstalled(tool, version, os) {
             .access(p || '')
             .then(() => p)
             .catch(() => undefined);
-        if (installedPath) {
-            core.addPath(installedPath);
-            core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
-            return true;
-        }
+        if (installedPath)
+            return success(tool, version, installedPath);
     }
     return false;
 }

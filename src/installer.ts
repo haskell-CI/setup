@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import {exec} from '@actions/exec';
+import {which} from '@actions/io';
 import {create as glob} from '@actions/glob';
 import * as tc from '@actions/tool-cache';
 import {promises as fs} from 'fs';
@@ -10,12 +11,24 @@ function failed(tool: Tool, version: string): void {
   throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 
+async function success(
+  tool: Tool,
+  version: string,
+  path: string
+): Promise<true> {
+  core.addPath(path);
+  core.setOutput(`${tool}-path`, path);
+  core.setOutput(`${tool}-exe`, await which(tool));
+  core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
+  return true;
+}
+
 function warn(tool: Tool, version: string): void {
-  const policy = ({
+  const policy = {
     cabal: `the two latest major releases of ${tool} are commonly supported.`,
     ghc: `the three latest major releases of ${tool} are commonly supported.`,
     stack: `the latest release of ${tool} is commonly supported.`
-  } as Record<Tool, string>)[tool];
+  }[tool];
 
   core.warning(
     `${tool} ${version} was not found in the cache. It will be downloaded.\n` +
@@ -32,7 +45,8 @@ async function isInstalled(
   version: string,
   os: OS
 ): Promise<boolean> {
-  if (tc.find(tool, version)) return true;
+  const toolPath = tc.find(tool, version);
+  if (toolPath) return success(tool, version, toolPath);
 
   const stackPath =
     os === 'win32'
@@ -73,11 +87,7 @@ async function isInstalled(
       .then(() => p)
       .catch(() => undefined);
 
-    if (installedPath) {
-      core.addPath(installedPath);
-      core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
-      return true;
-    }
+    if (installedPath) return success(tool, version, installedPath);
   }
 
   return false;

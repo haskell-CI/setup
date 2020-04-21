@@ -6,6 +6,7 @@ This action sets up a Haskell environment for use in actions by:
 
 - optionally installing a version of [ghc](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/) and [cabal](https://www.haskell.org/cabal/) and adding to PATH.
 - optionally installing a version of [Stack](https://haskellstack.org) and adding to PATH.
+- setting the outputs of `ghc-path`, `cabal-path`, `stack-path`, and `cabal-store` when necessary.
 
 The GitHub runners come with [pre-installed versions of GHC and Cabal](https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners). Those will be used whenever possible.
 For all other versions, this action utilizes [`ppa:hvr/ghc`](https://launchpad.net/~hvr/+archive/ubuntu/ghc), [`ghcup`](https://gitlab.haskell.com/ghcup), and [`chocolatey`](https://chocolatey.org/packages/ghc).
@@ -89,6 +90,18 @@ jobs:
 | `enable-stack`    |          | If specified, will setup Stack.                                                                                                                | "boolean" | false   |
 | `stack-no-global` |          | If specified, enable-stack must be set. Prevents installing GHC and Cabal globally                                                             | "boolean" | false   |
 | `stack-setup-ghc` |          | If specified, enable-stack must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`) | "boolean" | false   |
+
+## Outputs
+
+| Name          | Description                                  | Type   |
+| ------------- | -------------------------------------------- | ------ |
+| `ghc-path`    | The path of the ghc executable _directory_   | string |
+| `cabal-path`  | The path of the cabal executable _directory_ | string |
+| `stack-path`  | The path of the stack executable _directory_ | string |
+| `cabal-store` | The path to the cabal store                  | string |
+| `ghc-exe`     | The path of the ghc _executable_             | string |
+| `cabal-exe`   | The path of the cabal _executable_           | string |
+| `stack-exe`   | The path of the stack _executable_           | string |
 
 ## Version Support
 
