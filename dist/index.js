@@ -10634,7 +10634,7 @@ async function success(tool, version, path) {
     core.addPath(path);
     core.setOutput(`${tool}-path`, path);
     core.setOutput(`${tool}-exe`, await io_1.which(tool));
-    core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
+    core.info(`Found ${tool} ${version} in cache at path ${path}. Setup successful.`);
     return true;
 }
 function warn(tool, version) {

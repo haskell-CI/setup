@@ -19,7 +19,9 @@ async function success(
   core.addPath(path);
   core.setOutput(`${tool}-path`, path);
   core.setOutput(`${tool}-exe`, await which(tool));
-  core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
+  core.info(
+    `Found ${tool} ${version} in cache at path ${path}. Setup successful.`
+  );
   return true;
 }
 
