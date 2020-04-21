@@ -51,7 +51,7 @@ async function isInstalled(
   if (toolPath) return success(tool, version, toolPath);
 
   const ghcupPath = `${process.env.HOME}/.ghcup${
-    tool === 'ghc' ? `/${tool}/${version}` : ''
+    tool === 'ghc' ? `/ghc/${version}` : ''
   }/bin`;
   const v = tool === 'cabal' ? version.slice(0, 3) : version;
   const aptPath = `/opt/${tool}/${v}/bin`;
@@ -69,8 +69,8 @@ async function isInstalled(
     stack: [], // Always installed into the tool cache
     cabal: {
       win32: [chocoPath],
-      linux: [aptPath, ghcupPath],
-      darwin: [ghcupPath]
+      linux: [aptPath],
+      darwin: []
     }[os],
     ghc: {
       win32: [chocoPath],
@@ -81,8 +81,17 @@ async function isInstalled(
 
   for (const p of locations[tool]) {
     const installedPath = await fs
-      .access(p || '')
+      .access(p)
       .then(() => p)
+      .catch(() => undefined);
+
+    if (installedPath) return success(tool, version, installedPath);
+  }
+
+  if (tool === 'cabal' && os !== 'win32') {
+    const installedPath = await fs
+      .access(`${ghcupPath}/cabal`)
+      .then(() => ghcupPath)
       .catch(() => undefined);
 
     if (installedPath) return success(tool, version, installedPath);

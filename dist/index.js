@@ -10654,7 +10654,7 @@ async function isInstalled(tool, version, os) {
     const toolPath = tc.find(tool, version);
     if (toolPath)
         return success(tool, version, toolPath);
-    const ghcupPath = `${process.env.HOME}/.ghcup${tool === 'ghc' ? `/${tool}/${version}` : ''}/bin`;
+    const ghcupPath = `${process.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
     const aptPath = `/opt/${tool}/${v}/bin`;
     const chocoPath = path_1.join(`${process.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`, 'tools', `${tool}-${version}`, tool === 'ghc' ? 'bin' : '');
@@ -10662,8 +10662,8 @@ async function isInstalled(tool, version, os) {
         stack: [],
         cabal: {
             win32: [chocoPath],
-            linux: [aptPath, ghcupPath],
-            darwin: [ghcupPath]
+            linux: [aptPath],
+            darwin: []
         }[os],
         ghc: {
             win32: [chocoPath],
@@ -10673,8 +10673,16 @@ async function isInstalled(tool, version, os) {
     };
     for (const p of locations[tool]) {
         const installedPath = await fs_1.promises
-            .access(p || '')
+            .access(p)
             .then(() => p)
+            .catch(() => undefined);
+        if (installedPath)
+            return success(tool, version, installedPath);
+    }
+    if (tool === 'cabal' && os !== 'win32') {
+        const installedPath = await fs_1.promises
+            .access(`${ghcupPath}/cabal`)
+            .then(() => ghcupPath)
             .catch(() => undefined);
         if (installedPath)
             return success(tool, version, installedPath);
