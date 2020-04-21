@@ -10617,7 +10617,6 @@ const core = __importStar(__webpack_require__(470));
 const exec_1 = __webpack_require__(986);
 const glob_1 = __webpack_require__(281);
 const tc = __importStar(__webpack_require__(533));
-const io_1 = __webpack_require__(1);
 const fs_1 = __webpack_require__(747);
 const path_1 = __webpack_require__(622);
 function failed(tool, version) {
@@ -10636,47 +10635,68 @@ function warn(tool, version) {
         'If the list is outdated, please file an issue here: https://github.com/actions/virtual-environments\n' +
         'by using the appropriate tool request template: https://github.com/actions/virtual-environments/issues/new/choose');
 }
-async function isInstalled(tool, version, path) {
-    const installedPath = tc.find(tool, version) ||
-        (await fs_1.promises
-            .access(path || '')
-            .then(() => path)
-            .catch(() => undefined));
-    if (installedPath) {
-        core.addPath(installedPath);
-        core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
+async function isInstalled(tool, version, os) {
+    if (tc.find(tool, version))
+        return true;
+    const stackPath = os === 'win32'
+        ? path_1.join(`${process.env.APPDATA}`, 'local', 'bin')
+        : '/usr/local/bin';
+    const ghcupPath = `${process.env.HOME}/.ghcup/bin`;
+    const v = tool === 'cabal' ? version.slice(0, 3) : version;
+    const aptPath = `/opt/${tool}/${v}/bin`;
+    const chocoPath = path_1.join(`${process.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`, 'tools', `${tool}-${version}`, tool === 'ghc' ? 'bin' : '');
+    const locations = {
+        stack: [stackPath],
+        cabal: {
+            win32: [chocoPath],
+            linux: [aptPath, ghcupPath],
+            darwin: [ghcupPath]
+        }[os],
+        ghc: {
+            win32: [chocoPath],
+            linux: [aptPath, ghcupPath],
+            darwin: [ghcupPath]
+        }[os]
+    };
+    for (const p of locations[tool]) {
+        const installedPath = await fs_1.promises
+            .access(p || '')
+            .then(() => p)
+            .catch(() => undefined);
+        if (installedPath) {
+            core.addPath(installedPath);
+            core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
+            return true;
+        }
     }
-    return !!installedPath;
+    return false;
 }
 async function installTool(tool, version, os) {
-    if (await isInstalled(tool, version))
+    if (await isInstalled(tool, version, os))
         return;
+    warn(tool, version);
     if (tool === 'stack') {
-        warn(tool, version);
-        return void ((await stack(version, os)) || failed(tool, version));
+        await stack(version, os);
+        if (await isInstalled(tool, version, os))
+            return;
+        return failed(tool, version);
     }
-    let v;
     switch (os) {
         case 'linux':
-            // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
-            v = tool === 'cabal' ? version.slice(0, 3) : version;
-            if (await isInstalled(tool, v, path_1.join('/opt', tool, v, 'bin')))
+            await apt(tool, version);
+            if (await isInstalled(tool, version, os))
                 return;
-            warn(tool, v);
-            if ((await apt(tool, v)) || (await ghcup(tool, version)))
-                return;
+            await ghcup(tool, version);
             break;
         case 'win32':
-            warn(tool, version);
-            if (await choco(tool, version))
-                return;
+            await choco(tool, version);
             break;
         case 'darwin':
-            warn(tool, version);
-            if (await ghcup(tool, version))
-                return;
+            await ghcup(tool, version);
             break;
     }
+    if (await isInstalled(tool, version, os))
+        return;
     return failed(tool, version);
 }
 exports.installTool = installTool;
@@ -10694,20 +10714,13 @@ async function stack(version, os) {
     const [stackPath] = await glob_1.create(`${p}/stack*`, {
         implicitDescendants: false
     }).then(async (g) => g.glob());
-    const path = await tc.cacheDir(stackPath, 'stack', version);
-    if (await isInstalled('stack', version, path))
-        return true;
-    core.info(`stack ${version} could not be installed.`);
-    return false;
+    await tc.cacheDir(stackPath, 'stack', version);
 }
 async function apt(tool, version) {
-    core.info(`Attempting to install ${tool} ${version} using apt-get`);
     const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
-    await exec_1.exec(`sudo -- sh -c "apt-get -y install ${toolName}-${version}"`);
-    if (await isInstalled(tool, version, `/opt/${tool}/${version}/bin`))
-        return true;
-    core.info(`${tool} ${version} could not be installed with apt-get.`);
-    return false;
+    const v = tool === 'cabal' ? version.slice(0, 3) : version;
+    core.info(`Attempting to install ${toolName} ${v} using apt-get`);
+    await exec_1.exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
 }
 async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
@@ -10721,10 +10734,6 @@ async function choco(tool, version) {
         '--no-progress',
         '-r'
     ]);
-    if (await isInstalled(tool, version, path_1.dirname(await io_1.which(tool))))
-        return true;
-    core.info(`${tool} ${version} could not be installed with chocolatey.`);
-    return false;
 }
 async function ghcup(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
@@ -10733,10 +10742,6 @@ async function ghcup(tool, version) {
     await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
     if (tool === 'ghc')
         await exec_1.exec(bin, ['set', version]);
-    if (await isInstalled(tool, version, `${process.env.HOME}/.ghcup/bin`))
-        return true;
-    core.info(`${tool} ${version} could not be installed with ghcup.`);
-    return false;
 }
 
 

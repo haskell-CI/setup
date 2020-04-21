@@ -2,9 +2,8 @@ import * as core from '@actions/core';
 import {exec} from '@actions/exec';
 import {create as glob} from '@actions/glob';
 import * as tc from '@actions/tool-cache';
-import {which} from '@actions/io';
 import {promises as fs} from 'fs';
-import {join, dirname} from 'path';
+import {join} from 'path';
 import type {OS, Tool} from './opts';
 
 function failed(tool: Tool, version: string): void {
@@ -31,21 +30,57 @@ function warn(tool: Tool, version: string): void {
 async function isInstalled(
   tool: Tool,
   version: string,
-  path?: string
+  os: OS
 ): Promise<boolean> {
-  const installedPath =
-    tc.find(tool, version) ||
-    (await fs
-      .access(path || '')
-      .then(() => path)
-      .catch(() => undefined));
+  if (tc.find(tool, version)) return true;
 
-  if (installedPath) {
-    core.addPath(installedPath);
-    core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
+  const stackPath =
+    os === 'win32'
+      ? join(`${process.env.APPDATA}`, 'local', 'bin')
+      : '/usr/local/bin';
+
+  const ghcupPath = `${process.env.HOME}/.ghcup/bin`;
+
+  const v = tool === 'cabal' ? version.slice(0, 3) : version;
+  const aptPath = `/opt/${tool}/${v}/bin`;
+
+  const chocoPath = join(
+    `${process.env.ChocolateyInstall}`,
+    'lib',
+    `${tool}.${version}`,
+    'tools',
+    `${tool}-${version}`,
+    tool === 'ghc' ? 'bin' : ''
+  );
+
+  const locations = {
+    stack: [stackPath],
+    cabal: {
+      win32: [chocoPath],
+      linux: [aptPath, ghcupPath],
+      darwin: [ghcupPath]
+    }[os],
+    ghc: {
+      win32: [chocoPath],
+      linux: [aptPath, ghcupPath],
+      darwin: [ghcupPath]
+    }[os]
+  };
+
+  for (const p of locations[tool]) {
+    const installedPath = await fs
+      .access(p || '')
+      .then(() => p)
+      .catch(() => undefined);
+
+    if (installedPath) {
+      core.addPath(installedPath);
+      core.info(`Found in cache: ${tool} ${version}. Setup successful.`);
+      return true;
+    }
   }
 
-  return !!installedPath;
+  return false;
 }
 
 export async function installTool(
@@ -53,35 +88,34 @@ export async function installTool(
   version: string,
   os: OS
 ): Promise<void> {
-  if (await isInstalled(tool, version)) return;
+  if (await isInstalled(tool, version, os)) return;
+  warn(tool, version);
 
   if (tool === 'stack') {
-    warn(tool, version);
-    return void ((await stack(version, os)) || failed(tool, version));
+    await stack(version, os);
+    if (await isInstalled(tool, version, os)) return;
+    return failed(tool, version);
   }
 
-  let v;
   switch (os) {
     case 'linux':
-      // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
-      v = tool === 'cabal' ? version.slice(0, 3) : version;
-      if (await isInstalled(tool, v, join('/opt', tool, v, 'bin'))) return;
-      warn(tool, v);
-      if ((await apt(tool, v)) || (await ghcup(tool, version))) return;
+      await apt(tool, version);
+      if (await isInstalled(tool, version, os)) return;
+      await ghcup(tool, version);
       break;
     case 'win32':
-      warn(tool, version);
-      if (await choco(tool, version)) return;
+      await choco(tool, version);
       break;
     case 'darwin':
-      warn(tool, version);
-      if (await ghcup(tool, version)) return;
+      await ghcup(tool, version);
       break;
   }
+
+  if (await isInstalled(tool, version, os)) return;
   return failed(tool, version);
 }
 
-async function stack(version: string, os: OS): Promise<boolean> {
+async function stack(version: string, os: OS): Promise<void> {
   core.info(`Attempting to install stack ${version}`);
   const build = {
     linux: 'linux-x86_64-static',
@@ -97,26 +131,17 @@ async function stack(version: string, os: OS): Promise<boolean> {
   const [stackPath] = await glob(`${p}/stack*`, {
     implicitDescendants: false
   }).then(async g => g.glob());
-  const path = await tc.cacheDir(stackPath, 'stack', version);
-
-  if (await isInstalled('stack', version, path)) return true;
-  core.info(`stack ${version} could not be installed.`);
-  return false;
+  await tc.cacheDir(stackPath, 'stack', version);
 }
 
-async function apt(tool: Tool, version: string): Promise<boolean> {
-  core.info(`Attempting to install ${tool} ${version} using apt-get`);
-
+async function apt(tool: Tool, version: string): Promise<void> {
   const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
-  await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${version}"`);
-
-  if (await isInstalled(tool, version, `/opt/${tool}/${version}/bin`))
-    return true;
-  core.info(`${tool} ${version} could not be installed with apt-get.`);
-  return false;
+  const v = tool === 'cabal' ? version.slice(0, 3) : version;
+  core.info(`Attempting to install ${toolName} ${v} using apt-get`);
+  await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
 }
 
-async function choco(tool: Tool, version: string): Promise<boolean> {
+async function choco(tool: Tool, version: string): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using chocolatey`);
 
   await exec('powershell', [
@@ -129,13 +154,9 @@ async function choco(tool: Tool, version: string): Promise<boolean> {
     '--no-progress',
     '-r'
   ]);
-
-  if (await isInstalled(tool, version, dirname(await which(tool)))) return true;
-  core.info(`${tool} ${version} could not be installed with chocolatey.`);
-  return false;
 }
 
-async function ghcup(tool: Tool, version: string): Promise<boolean> {
+async function ghcup(tool: Tool, version: string): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using ghcup`);
 
   const bin = await tc.downloadTool(
@@ -145,9 +166,4 @@ async function ghcup(tool: Tool, version: string): Promise<boolean> {
 
   await exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
   if (tool === 'ghc') await exec(bin, ['set', version]);
-
-  if (await isInstalled(tool, version, `${process.env.HOME}/.ghcup/bin`))
-    return true;
-  core.info(`${tool} ${version} could not be installed with ghcup.`);
-  return false;
 }
