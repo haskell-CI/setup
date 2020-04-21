@@ -8433,6 +8433,13 @@ const exec_1 = __webpack_require__(986);
             await core.group('Setting up cabal', async () => {
                 await exec_1.exec('cabal user-config update -a "http-transport: plain-http" -v3');
                 await exec_1.exec('cabal', ['update']);
+                if (process.platform === 'win32') {
+                    await exec_1.exec('cabal user-config update -a "store-dir: C:\\sr" -v3');
+                    core.setOutput('cabal-store', 'C:\\sr');
+                }
+                else {
+                    core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
+                }
             });
     }
     catch (error) {
@@ -10721,6 +10728,8 @@ async function stack(version, os) {
         implicitDescendants: false
     }).then(async (g) => g.glob());
     await tc.cacheDir(stackPath, 'stack', version);
+    if (os === 'win32')
+        core.exportVariable('STACK_ROOT', 'C:\\sr');
 }
 async function apt(tool, version) {
     const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';

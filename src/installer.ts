@@ -142,6 +142,8 @@ async function stack(version: string, os: OS): Promise<void> {
     implicitDescendants: false
   }).then(async g => g.glob());
   await tc.cacheDir(stackPath, 'stack', version);
+
+  if (os === 'win32') core.exportVariable('STACK_ROOT', 'C:\\sr');
 }
 
 async function apt(tool: Tool, version: string): Promise<void> {

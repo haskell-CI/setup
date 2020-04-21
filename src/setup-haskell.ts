@@ -25,6 +25,12 @@ import {exec} from '@actions/exec';
           'cabal user-config update -a "http-transport: plain-http" -v3'
         );
         await exec('cabal', ['update']);
+        if (process.platform === 'win32') {
+          await exec('cabal user-config update -a "store-dir: C:\\sr" -v3');
+          core.setOutput('cabal-store', 'C:\\sr');
+        } else {
+          core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
+        }
       });
   } catch (error) {
     core.setFailed(error.message);
