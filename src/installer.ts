@@ -50,13 +50,9 @@ async function isInstalled(
   const toolPath = tc.find(tool, version);
   if (toolPath) return success(tool, version, toolPath);
 
-  const stackPath =
-    os === 'win32'
-      ? join(`${process.env.APPDATA}`, 'local', 'bin')
-      : `${process.env.HOME}/.local/bin`;
-
-  const ghcupPath = `${process.env.HOME}/.ghcup/bin`;
-
+  const ghcupPath = `${process.env.HOME}/.ghcup${
+    tool === 'ghc' ? `/${tool}/${version}` : ''
+  }/bin`;
   const v = tool === 'cabal' ? version.slice(0, 3) : version;
   const aptPath = `/opt/${tool}/${v}/bin`;
 
@@ -70,7 +66,7 @@ async function isInstalled(
   );
 
   const locations = {
-    stack: [stackPath],
+    stack: [], // Always installed into the tool cache
     cabal: {
       win32: [chocoPath],
       linux: [aptPath, ghcupPath],
@@ -89,8 +85,7 @@ async function isInstalled(
       .then(() => p)
       .catch(() => undefined);
 
-    if (installedPath && (await which(tool)))
-      return success(tool, version, installedPath);
+    if (installedPath) return success(tool, version, installedPath);
   }
 
   return false;
