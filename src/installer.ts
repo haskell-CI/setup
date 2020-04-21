@@ -111,13 +111,13 @@ export async function installTool(
     case 'linux':
       await apt(tool, version);
       if (await isInstalled(tool, version, os)) return;
-      await ghcup(tool, version);
+      await ghcup(tool, version, os);
       break;
     case 'win32':
       await choco(tool, version);
       break;
     case 'darwin':
-      await ghcup(tool, version);
+      await ghcup(tool, version, os);
       break;
   }
 
@@ -168,11 +168,13 @@ async function choco(tool: Tool, version: string): Promise<void> {
   ]);
 }
 
-async function ghcup(tool: Tool, version: string): Promise<void> {
+async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using ghcup`);
 
   const bin = await tc.downloadTool(
-    'https://raw.githubusercontent.com/haskell/ghcup/master/ghcup'
+    `https://downloads.haskell.org/~ghcup/x86_64-${
+      os === 'darwin' ? 'apple-darwin' : 'linux'
+    }-ghcup`
   );
   await fs.chmod(bin, 0o755);
 

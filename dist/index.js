@@ -10699,13 +10699,13 @@ async function installTool(tool, version, os) {
             await apt(tool, version);
             if (await isInstalled(tool, version, os))
                 return;
-            await ghcup(tool, version);
+            await ghcup(tool, version, os);
             break;
         case 'win32':
             await choco(tool, version);
             break;
         case 'darwin':
-            await ghcup(tool, version);
+            await ghcup(tool, version, os);
             break;
     }
     if (await isInstalled(tool, version, os))
@@ -10750,9 +10750,9 @@ async function choco(tool, version) {
         '-r'
     ]);
 }
-async function ghcup(tool, version) {
+async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
-    const bin = await tc.downloadTool('https://raw.githubusercontent.com/haskell/ghcup/master/ghcup');
+    const bin = await tc.downloadTool(`https://downloads.haskell.org/~ghcup/x86_64-${os === 'darwin' ? 'apple-darwin' : 'linux'}-ghcup`);
     await fs_1.promises.chmod(bin, 0o755);
     await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
     if (tool === 'ghc')
