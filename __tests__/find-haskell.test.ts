@@ -25,7 +25,7 @@ describe('actions/setup-haskell', () => {
   afterEach(() => (process.env = OLD_ENV));
 
   it('Parses action.yml to get correct default versions', () => {
-    const defs = {ghc: '8.8.3', cabal: '3.0.0.0', stack: '2.1.3'};
+    const defs = {ghc: '8.10.1', cabal: '3.2.0.0', stack: '2.1.3'};
     forAll(t => expect(def[t].version).toBe(defs[t]));
   });
 

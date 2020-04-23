@@ -9,7 +9,7 @@ This action sets up a Haskell environment for use in actions by:
 - setting the outputs of `ghc-path`, `cabal-path`, `stack-path`, and `cabal-store` when necessary.
 
 The GitHub runners come with [pre-installed versions of GHC and Cabal](https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners). Those will be used whenever possible.
-For all other versions, this action utilizes [`ppa:hvr/ghc`](https://launchpad.net/~hvr/+archive/ubuntu/ghc), [`ghcup`](https://gitlab.haskell.com/ghcup), and [`chocolatey`](https://chocolatey.org/packages/ghc).
+For all other versions, this action utilizes [`ppa:hvr/ghc`](https://launchpad.net/~hvr/+archive/ubuntu/ghc), [`ghcup`](https://gitlab.haskell.org/haskell/ghcup-hs), and [`chocolatey`](https://chocolatey.org/packages/ghc).
 
 ## Usage
 
@@ -84,8 +84,8 @@ jobs:
 
 | Name              | Required | Description                                                                                                                                    | Type      | Default |
 | ----------------- | :------: | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
-| `ghc-version`     |          | GHC version to use, ex. `8.8.3`                                                                                                                | string    | 8.8.3   |
-| `cabal-version`   |          | Cabal version to use, ex. `3.0.0.0`                                                                                                            | string    | latest  |
+| `ghc-version`     |          | GHC version to use, ex. `latest`                                                                                                               | string    | latest  |
+| `cabal-version`   |          | Cabal version to use, ex. `3.2`                                                                                                                | string    | latest  |
 | `stack-version`   |          | Stack version to use, ex. `latest`. Stack will only be installed if enable-stack is set.                                                       | string    | latest  |
 | `enable-stack`    |          | If specified, will setup Stack.                                                                                                                | "boolean" | false   |
 | `stack-no-global` |          | If specified, enable-stack must be set. Prevents installing GHC and Cabal globally                                                             | "boolean" | false   |
@@ -107,9 +107,9 @@ jobs:
 
 **GHC:**
 
-- `latest`
+- `latest` (default, recommended)
 - `8.10.1` `8.10`
-- `8.8.3` `8.8` (default)
+- `8.8.3` `8.8`
 - `8.8.2`
 - `8.8.1`
 - `8.6.5` `8.6`
@@ -130,6 +130,7 @@ Suggestion: Try to support the three latest major versions of GHC.
 **Cabal:**
 
 - `latest` (default, recommended)
+- `3.2.0.0` `3.2`
 - `3.0.0.0` `3.0`
 - `2.4.1.0` `2.4`
 - `2.4.0.0`
@@ -159,7 +160,7 @@ Recommendation: Use the latest available version if possible.
 
 The full list of available versions of GHC, Cabal, and Stack are as follows:
 
-- [Linux/macOS - Cabal and GHC](https://gitlab.haskell.org/haskell/ghcup/blob/master/.available-versions)
+- [Linux/macOS - Cabal and GHC](https://www.haskell.org/ghc/download.html)
 - [Windows - Cabal](https://chocolatey.org/packages/cabal#versionhistory).
 - [Windows - GHC](https://chocolatey.org/packages/ghc#versionhistory)
 - [Linux/macOS/Windows - Stack](https://github.com/commercialhaskell/stack/tags)

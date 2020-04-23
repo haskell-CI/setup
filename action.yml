@@ -4,19 +4,19 @@ author: 'GitHub'
 inputs:
   ghc-version:
     required: false
-    description: 'Version of ghc to use.'
-    default: '8.8'
+    description: 'Version of GHC to use. If set to "latest", it will always get the latest stable version.'
+    default: 'latest'
   cabal-version:
     required: false
-    description: 'Version of cabal to use. If set to "latest", it will always get the latest stable version.'
+    description: 'Version of Cabal to use. If set to "latest", it will always get the latest stable version.'
     default: 'latest'
   stack-version:
     required: false
-    description: 'Version of stack to use. If set to "latest", it will always get the latest stable version.'
+    description: 'Version of Stack to use. If set to "latest", it will always get the latest stable version.'
     default: 'latest'
   enable-stack:
     required: false
-    description: 'If specified, will setup stack'
+    description: 'If specified, will setup Stack'
   stack-no-global:
     required: false
     description: 'If specified, enable-stack must be set. Prevents installing GHC and Cabal globally'
