@@ -112,12 +112,13 @@ jobs:
 | Name          | Description                                  | Type   |
 | ------------- | -------------------------------------------- | ------ |
 | `ghc-path`    | The path of the ghc executable _directory_   | string |
-| `cabal-path`  | The path of the cabal executable _directory_ | string |
-| `stack-path`  | The path of the stack executable _directory_ | string |
-| `cabal-store` | The path to the cabal store                  | string |
 | `ghc-exe`     | The path of the ghc _executable_             | string |
+| `cabal-path`  | The path of the cabal executable _directory_ | string |
 | `cabal-exe`   | The path of the cabal _executable_           | string |
+| `cabal-store` | The path to the cabal store                  | string |
+| `stack-path`  | The path of the stack executable _directory_ | string |
 | `stack-exe`   | The path of the stack _executable_           | string |
+| `stack-root`  | The path to the stack root                   | string |
 
 ## Version Support
 
@@ -160,7 +161,6 @@ Recommendation: Use the latest available version if possible.
 
 - `latest` (recommended) -- follows the latest release automatically.
 - `2.3.3` `2.3`
-- `2.3.1`
 - `2.3.1`
 - `2.1.3` `2.1`
 - `2.1.1`

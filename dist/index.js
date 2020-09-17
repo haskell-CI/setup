@@ -11024,10 +11024,22 @@ const path_1 = __webpack_require__(622);
 function failed(tool, version) {
     throw new Error(`All install methods for ${tool} ${version} failed`);
 }
-async function success(tool, version, path) {
-    core.addPath(path);
+async function configureOutputs(tool, path, os) {
     core.setOutput(`${tool}-path`, path);
     core.setOutput(`${tool}-exe`, await io_1.which(tool));
+    if (tool == 'stack') {
+        if (os === 'win32') {
+            core.exportVariable('STACK_ROOT', 'C:\\sr');
+            core.setOutput('stack-root', 'C:\\sr');
+        }
+        else {
+            core.setOutput('stack-root', `${process.env.HOME}/.stack`);
+        }
+    }
+}
+async function success(tool, version, path, os) {
+    core.addPath(path);
+    await configureOutputs(tool, path, os);
     core.info(`Found ${tool} ${version} in cache at path ${path}. Setup successful.`);
     return true;
 }
@@ -11047,7 +11059,7 @@ function warn(tool, version) {
 async function isInstalled(tool, version, os) {
     const toolPath = tc.find(tool, version);
     if (toolPath)
-        return success(tool, version, toolPath);
+        return success(tool, version, toolPath, os);
     const ghcupPath = `${process.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
     const aptPath = `/opt/${tool}/${v}/bin`;
@@ -11075,7 +11087,7 @@ async function isInstalled(tool, version, os) {
             // default prior to this action being ran.
             if (tool === 'ghc' && installedPath === ghcupPath)
                 await exec_1.exec(await ghcupBin(os), ['set', version]);
-            return success(tool, version, installedPath);
+            return success(tool, version, installedPath, os);
         }
     }
     if (tool === 'cabal' && os !== 'win32') {
@@ -11084,7 +11096,7 @@ async function isInstalled(tool, version, os) {
             .then(() => ghcupPath)
             .catch(() => undefined);
         if (installedPath)
-            return success(tool, version, installedPath);
+            return success(tool, version, installedPath, os);
     }
     return false;
 }
